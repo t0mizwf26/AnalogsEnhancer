@@ -11,16 +11,16 @@ static uint8_t current_hook = 0;
 static SceUID hooks[HOOKS_NUM];
 static tai_hook_ref_t refs[HOOKS_NUM];
 
-static uint32_t deadzoneLeft, deadzoneRight;
+static uint32_t deadzoneLeft, deadzoneOuterLeft, deadzoneRight, deadzoneOuterRight;
 static char buffer[32];
 static char rescaleLeft, rescaleRight, widePatch;
 static uint8_t apply_wide_patch = 0;
 
-static void (*patchFuncLeft)(uint8_t *x, uint8_t *y, int dead);
-static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead);
+static void (*patchFuncLeft)(uint8_t *x, uint8_t *y, int dead, int deadOuter);
+static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead, int deadOuter);
 
 // Courtesy of rsn8887
-void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead) {
+void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
 	//radial and scaled deadzone
 	//http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
 	//input and output values go from 0...255;
@@ -30,7 +30,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead) {
         *x = 127;
         *y = 127;
         return;
-    } 
+    }
 
 	float analogX = (float) *x - 127.0f;
     float analogY = (float) *y - 127.0f;
@@ -85,28 +85,52 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead) {
     }
 }
 
-void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead) {
-	
-	if (dead == 0) return;
+void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
+
+    // ensure inner deadzone and outer deadzone never overlap
+    if (deadOuter <= dead) deadOuter = dead + 1;
+	// 0 or 128 will disable outer deadzone
+    if (deadOuter == 0 || deadOuter > 128) deadOuter = 128;
+
+    // both inner and outer deadzone disabled
+    if (dead == 0 && deadOuter == 128) return;
+
+    // stick disabled
     if (dead > 126) {
         *x = 127;
         *y = 127;
         return;
-    } 
-	
-	float analogX = (float) *x - 127.0f;
-	float analogY = (float) *y - 127.0f;
-	float deadZone = (float) dead;
-	float magnitude = sqrt(analogX * analogX + analogY * analogY);
-	if (magnitude < deadZone){
-		*x = 127;
-		*y = 127;
-	}
+    }
+
+    float analogX = (float) *x - 127.0f;
+    float analogY = (float) *y - 127.0f;
+    float deadZone = (float) dead;
+    float deadZoneOuter = (float) deadOuter;
+    float magnitude = sqrt(analogX * analogX + analogY * analogY);
+
+    // when within inner deadzone, stick is centred
+    if (magnitude < deadZone){
+        *x = 127;
+        *y = 127;
+    }
+
+    // when exceeding outer deadzone, stick become 8-way digital
+    // 176 and 78 means 127 +/- 49
+    // 128*sin(22.5deg) = ~49
+    if (magnitude >= deadOuter){
+        if (*x > 176) *x = 255;
+        else if (*x < 78) *x = 0;
+		else *x = 127;
+        if (*y > 176) *y = 255;
+        else if (*y < 78) *y = 0;
+        else *y = 127;
+    }
+    // by playing with inner and outer deadzone value, this will make analog into 8-way digital with customizable actuation point
 }
 
 void patchData(uint8_t *data) {
-	patchFuncLeft(&data[12], &data[13], deadzoneLeft);
-	patchFuncRight(&data[14], &data[15], deadzoneRight);
+	patchFuncLeft(&data[12], &data[13], deadzoneLeft, deadzoneOuterLeft);
+	patchFuncRight(&data[14], &data[15], deadzoneRight, deadzoneOuterRight);
 }
 
 void loadConfig(void) {
@@ -119,8 +143,8 @@ void loadConfig(void) {
 	if (fd >= 0){
 		ksceIoRead(fd, buffer, 32);
 		ksceIoClose(fd);
-	}else sprintf(buffer, "left=0,n;right=0,n;y");
-	sscanf(buffer, "left=%lu,%c;right=%lu,%c;%c", &deadzoneLeft, &rescaleLeft, &deadzoneRight, &rescaleRight, &widePatch);
+	}else sprintf(buffer, "left=0,128,n;right=0,128,n;y");
+	sscanf(buffer, "left=%lu,%lu,%c;right=%lu,%lu,%c;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &widePatch);
 	
 	if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
 	else patchFuncLeft = deadzoneAnalogs;
