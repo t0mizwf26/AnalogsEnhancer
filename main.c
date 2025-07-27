@@ -70,7 +70,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead) {
         analogX = (clampingFactor * analogX);
         analogY = (clampingFactor * analogY);
 
-        // use clamping factor 0.992188f (= 127.0f / 128.0f) to fix -127 (i.e. < 0) issue introduced by above code, so the range is no longer -1 to 255 but 0 to 255
+        // use clamping factor 0.992188f (= 127.0f / 128.0f) to fix '< -127' (i.e. '< 0') issue introduced by above code, so the range is no longer -1 to 255 but 0 to 255
         if (analogX < -127.0f || analogY < -127.0f){
             analogX = 0.992188f * analogX;
             analogY = 0.992188f * analogY;
@@ -112,10 +112,10 @@ void patchData(uint8_t *data) {
 void loadConfig(void) {
 
 	// Just in case the folder doesn't exist
-	ksceIoMkdir("ux0:data/AnalogsEnhancer", 0777); 
+	// ksceIoMkdir("ux0:data/AnalogsEnhancer", 0777); 
 	
 	// Loading generic config file
-	SceUID fd = ksceIoOpen("ux0:/data/AnalogsEnhancer/config.txt", SCE_O_RDONLY, 0777);
+	SceUID fd = ksceIoOpen("ur0:/tai/AnalogsEnhancerKai.txt", SCE_O_RDONLY, 0777);
 	if (fd >= 0){
 		ksceIoRead(fd, buffer, 32);
 		ksceIoClose(fd);
