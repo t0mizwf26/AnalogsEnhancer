@@ -20,22 +20,34 @@ static void (*patchFuncLeft)(uint8_t *x, uint8_t *y, int dead, int deadOuter);
 static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead, int deadOuter);
 
 // Courtesy of rsn8887
+// Thanks u/lizin5ths for outer deadzone idea
 void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
     //radial and scaled deadzone
     //http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
     //input and output values go from 0...255;
 
-    if (dead == 0) return;
+    // stick disabled (stick always centre)
     if (dead > 126) {
         *x = 127;
         *y = 127;
         return;
     }
 
+    // outer deadzone disabled
+    if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
+
+    // both inner and outer deadzone disabled (stick works like normal)
+    if (dead == 0 && deadOuter == 127) return;
+
+    // ensure inner deadzone and outer deadzone never overlap
+    if (deadOuter <= dead) deadOuter = dead + 1;
+
     float analogX = (float) *x - 127.0f;
     float analogY = (float) *y - 127.0f;
     float deadZone = (float) dead;
+    float deadZoneOuter = 127.0f - (float) deadOuter;
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
+
     if (magnitude >= deadZone){
         //adjust maximum magnitude
         float absAnalogX = fabs(analogX);
@@ -47,10 +59,11 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogX) / absAnalogY) * ((127.0f * analogX) / absAnalogY));
 
         if (maximum > 1.25f * 127.0f) maximum = 1.25f * 127.0f;
+        // So 255 (aka +128) can be reached
         if (maximum < magnitude) maximum = magnitude;
 
-        // find scaled axis values with magnitudes between zero and maximum
-        float scalingFactor = maximum / magnitude * (magnitude - deadZone) / (maximum - deadZone);
+        // find scaled axis values with magnitudes between zero and maximum (or outer deadzone if enabled)
+        float scalingFactor = maximum / magnitude * (magnitude - deadZone) / ((maximum - deadZoneOuter) - deadZone);
         analogX = (analogX * scalingFactor);
         analogY = (analogY * scalingFactor);
 
@@ -80,6 +93,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
         *x = (uint8_t) (analogX + 127.0f);
         *y = (uint8_t) (analogY + 127.0f);
     }else{
+        // within inner deadzone, stick is centred
         *x = 127;
         *y = 127;
     }
@@ -95,10 +109,10 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
     }
 
     // outer deadzone disabled
-    if (deadOuter <= 0 || deadOuter > 128) deadOuter = 128;
+    if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
 
     // both inner and outer deadzone disabled (stick works like normal)
-    if (dead == 0 && deadOuter == 128) return;
+    if (dead == 0 && deadOuter == 127) return;
 
     // ensure inner deadzone and outer deadzone never overlap
     if (deadOuter <= dead) deadOuter = dead + 1;
@@ -117,8 +131,8 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
 
     // out daedzone enabled and stick reach or exceed outer deadzone, stick working like 8-way digital (like d-pad)
     // 176 and 78 means 127 +/- 49
-    // 128*sin(22.5deg) = ~49
-    if (deadOuter != 128){
+    // 127*sin(22.5deg) = about 49
+    if (deadOuter != 127){
         if (magnitude >= deadZoneOuter){
             if (*x >= 176) *x = 255;
             else if (*x <= 78) *x = 0;
@@ -156,7 +170,7 @@ void loadConfig(void) {
         ksceIoRead(fd, buffer, 32);
         ksceIoClose(fd);
     // (Now if no config file present, everything disabled by default, including wide patch, stick works like normal)
-    }else sprintf(buffer, "left=0,128,n;right=0,128,n;n");
+    }else sprintf(buffer, "left=0,128,n;right=0,127,n;n");
     sscanf(buffer, "left=%lu,%lu,%c;right=%lu,%lu,%c;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &widePatch);
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
