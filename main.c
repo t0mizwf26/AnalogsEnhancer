@@ -116,7 +116,7 @@ void loadConfig(void) {
     // ksceIoMkdir("ux0:data/AnalogsEnhancer", 0777);
 
     // Loading generic config file
-    // (Now using ur0:/tai/AnalogsEnhancerKai.txt as config file)
+    // (Now using ur0:/tai/AnalogsEnhancerKaiV.txt as config file)
     // SceUID fd = ksceIoOpen("ux0:/data/AnalogsEnhancer/config.txt", SCE_O_RDONLY, 0777);
     SceUID fd = ksceIoOpen("ur0:/tai/AnalogsEnhancerKai.txt", SCE_O_RDONLY, 0777);
     if (fd >= 0){
