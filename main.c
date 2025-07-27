@@ -87,20 +87,21 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
 
 void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
 
-    // ensure inner deadzone and outer deadzone never overlap
-    if (deadOuter <= dead) deadOuter = dead + 1;
-    // 0 or 128 will disable outer deadzone
-    if (deadOuter == 0 || deadOuter > 128) deadOuter = 128;
-
-    // both inner and outer deadzone disabled
-    if (dead == 0 && deadOuter == 128) return;
-
-    // stick disabled
+    // stick disabled (stick always centre)
     if (dead > 126) {
         *x = 127;
         *y = 127;
         return;
     }
+
+    // outer deadzone disabled
+    if (deadOuter <= 0 || deadOuter > 128) deadOuter = 128;
+
+    // both inner and outer deadzone disabled (stick works like normal)
+    if (dead == 0 && deadOuter == 128) return;
+
+    // ensure inner deadzone and outer deadzone never overlap
+    if (deadOuter <= dead) deadOuter = dead + 1;
 
     float analogX = (float) *x - 127.0f;
     float analogY = (float) *y - 127.0f;
@@ -108,24 +109,32 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
     float deadZoneOuter = (float) deadOuter;
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
 
-    // when within inner deadzone, stick is centred
+    // within inner deadzone, stick is centred
     if (magnitude < deadZone){
         *x = 127;
         *y = 127;
     }
 
-    // when exceeding outer deadzone, stick become 8-way digital
+    // out daedzone enabled and stick reach or exceed outer deadzone, stick working like 8-way digital (like d-pad)
     // 176 and 78 means 127 +/- 49
     // 128*sin(22.5deg) = ~49
-    if (magnitude >= deadOuter){
-        if (*x > 176) *x = 255;
-        else if (*x < 78) *x = 0;
-        else *x = 127;
-        if (*y > 176) *y = 255;
-        else if (*y < 78) *y = 0;
-        else *y = 127;
+    if (deadOuter != 128){
+        if (magnitude >= deadZoneOuter){
+            if (*x >= 176) *x = 255;
+            else if (*x <= 78) *x = 0;
+            else *x = 127;
+            if (*y >= 176) *y = 255;
+            else if (*y <= 78) *y = 0;
+            else *y = 127;
+        }
     }
-    // by playing with inner and outer deadzone value, this will make analog into 8-way digital with customizable actuation point
+    // By playing with inner and outer deadzone value, this will make analog into 8-way digital with customizable actuation point
+    // Diagonal directions (NE/SE/NW/SW) are only triggered when both x and y over +/- 49 
+    // Example 1: Inner Deadzone = 100 ; Outer Deadzone = 101
+    // >> Stick is now pure 8-way digital with actuation point at magnitude 101
+    // Example 2: Inner Deadzone = 10 ; Outer Deadzone = 150
+    // >> Stick working as analog with deadzone 10, with stick reach magnitude 150, stick change into 8-way digital
+
 }
 
 void patchData(uint8_t *data) {
@@ -135,15 +144,19 @@ void patchData(uint8_t *data) {
 
 void loadConfig(void) {
 
+    // (No longer needed since moved config to ur0:/tai)
     // Just in case the folder doesn't exist
     // ksceIoMkdir("ux0:data/AnalogsEnhancer", 0777);
 
     // Loading generic config file
+    // (Now using ur0:/tai/AnalogsEnhancerKai.txt as config file)
+    // SceUID fd = ksceIoOpen("ux0:/data/AnalogsEnhancer/config.txt", SCE_O_RDONLY, 0777);
     SceUID fd = ksceIoOpen("ur0:/tai/AnalogsEnhancerKai.txt", SCE_O_RDONLY, 0777);
     if (fd >= 0){
         ksceIoRead(fd, buffer, 32);
         ksceIoClose(fd);
-    }else sprintf(buffer, "left=0,128,n;right=0,128,n;y");
+    // (Now if no config file present, everything disabled by default, including wide patch, stick works like normal)
+    }else sprintf(buffer, "left=0,128,n;right=0,128,n;n");
     sscanf(buffer, "left=%lu,%lu,%c;right=%lu,%lu,%c;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &widePatch);
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
