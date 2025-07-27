@@ -21,18 +21,18 @@ static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead);
 
 // Courtesy of rsn8887
 void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead) {
-	//radial and scaled deadzone
-	//http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
-	//input and output values go from 0...255;
-	
-	if (dead == 0) return;
+    //radial and scaled deadzone
+    //http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
+    //input and output values go from 0...255;
+
+    if (dead == 0) return;
     if (dead > 126) {
         *x = 127;
         *y = 127;
         return;
-    } 
+    }
 
-	float analogX = (float) *x - 127.0f;
+    float analogX = (float) *x - 127.0f;
     float analogY = (float) *y - 127.0f;
     float deadZone = (float) dead;
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
@@ -45,15 +45,15 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead) {
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogY) / absAnalogX) * ((127.0f * analogY) / absAnalogX));
         else
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogX) / absAnalogY) * ((127.0f * analogX) / absAnalogY));
- 
+
         if (maximum > 1.25f * 127.0f) maximum = 1.25f * 127.0f;
         if (maximum < magnitude) maximum = magnitude;
-       
+   
         // find scaled axis values with magnitudes between zero and maximum
-        float scalingFactor = maximum / magnitude * (magnitude - deadZone) / (maximum - deadZone);     
+        float scalingFactor = maximum / magnitude * (magnitude - deadZone) / (maximum - deadZone); 
         analogX = (analogX * scalingFactor);
         analogY = (analogY * scalingFactor);
- 
+
         // clamp to ensure results will always lie between 0 and 255
         float clampingFactor = 1.0f;
         absAnalogX = fabs(analogX);
@@ -70,13 +70,13 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead) {
         analogX = (clampingFactor * analogX);
         analogY = (clampingFactor * analogY);
 
-        // use clamping factor 0.992188f (= 127.0f / 128.0f) to fix -127 (i.e. < 0) issue introduced by above code, so the range is no longer -1 to 255 but 0 to 255
+        // use clamping factor 0.992188f (= 127.0f / 128.0f) to fix '< -127' (i.e. '< 0') issue introduced by above code, so the range is no longer -1 to 255 but 0 to 255
         if (analogX < -127.0f || analogY < -127.0f){
             analogX = 0.992188f * analogX;
             analogY = 0.992188f * analogY;
         }
 
-        // convert -127 ~ 128 back to 0 ~ 255 
+        // convert -127 ~ 128 back to 0 ~ 255
         *x = (uint8_t) (analogX + 127.0f);
         *y = (uint8_t) (analogY + 127.0f);
     }else{
@@ -86,94 +86,98 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead) {
 }
 
 void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead) {
-	
-	if (dead == 0) return;
+
+    if (dead == 0) return;
     if (dead > 126) {
         *x = 127;
         *y = 127;
         return;
-    } 
-	
-	float analogX = (float) *x - 127.0f;
-	float analogY = (float) *y - 127.0f;
-	float deadZone = (float) dead;
-	float magnitude = sqrt(analogX * analogX + analogY * analogY);
-	if (magnitude < deadZone){
-		*x = 127;
-		*y = 127;
-	}
+    }
+
+    float analogX = (float) *x - 127.0f;
+    float analogY = (float) *y - 127.0f;
+    float deadZone = (float) dead;
+    float magnitude = sqrt(analogX * analogX + analogY * analogY);
+    if (magnitude < deadZone){
+        *x = 127;
+        *y = 127;
+    }
 }
 
 void patchData(uint8_t *data) {
-	patchFuncLeft(&data[12], &data[13], deadzoneLeft);
-	patchFuncRight(&data[14], &data[15], deadzoneRight);
+    patchFuncLeft(&data[12], &data[13], deadzoneLeft);
+    patchFuncRight(&data[14], &data[15], deadzoneRight);
 }
 
 void loadConfig(void) {
 
-	// Just in case the folder doesn't exist
-	ksceIoMkdir("ux0:data/AnalogsEnhancer", 0777); 
-	
-	// Loading generic config file
-	SceUID fd = ksceIoOpen("ux0:/data/AnalogsEnhancer/config.txt", SCE_O_RDONLY, 0777);
-	if (fd >= 0){
-		ksceIoRead(fd, buffer, 32);
-		ksceIoClose(fd);
-	}else sprintf(buffer, "left=0,n;right=0,n;y");
-	sscanf(buffer, "left=%lu,%c;right=%lu,%c;%c", &deadzoneLeft, &rescaleLeft, &deadzoneRight, &rescaleRight, &widePatch);
-	
-	if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
-	else patchFuncLeft = deadzoneAnalogs;
-	if (rescaleRight == 'y') patchFuncRight = rescaleAnalogs;
-	else patchFuncRight = deadzoneAnalogs;
-	if (widePatch == 'y') apply_wide_patch = 1;
-	
+    // (No longer needed since moved config to ur0:/tai)
+    // Just in case the folder doesn't exist
+    // ksceIoMkdir("ux0:data/AnalogsEnhancer", 0777);
+
+    // Loading generic config file
+    // (Now using ur0:/tai/AnalogsEnhancerKai.txt as config file)
+    // SceUID fd = ksceIoOpen("ux0:/data/AnalogsEnhancer/config.txt", SCE_O_RDONLY, 0777);
+    SceUID fd = ksceIoOpen("ur0:/tai/AnalogsEnhancerKai.txt", SCE_O_RDONLY, 0777);
+    if (fd >= 0){
+        ksceIoRead(fd, buffer, 32);
+        ksceIoClose(fd);
+    // (Now if no config file present, everything disabled by default, including wide patch, stick works like normal)
+    }else sprintf(buffer, "left=0,n;right=0,n;n");
+    sscanf(buffer, "left=%lu,%c;right=%lu,%c;%c", &deadzoneLeft, &rescaleLeft, &deadzoneRight, &rescaleRight, &widePatch);
+
+    if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
+    else patchFuncLeft = deadzoneAnalogs;
+    if (rescaleRight == 'y') patchFuncRight = rescaleAnalogs;
+    else patchFuncRight = deadzoneAnalogs;
+    if (widePatch == 'y') apply_wide_patch = 1;
+
 }
 
 // Simplified generic hooking functions
 void hookFunctionExport(uint32_t nid, const void *func, const char *module) {
-	hooks[current_hook] = taiHookFunctionExportForKernel(KERNEL_PID, &refs[current_hook], module, TAI_ANY_LIBRARY, nid, func);
-	current_hook++;
+    hooks[current_hook] = taiHookFunctionExportForKernel(KERNEL_PID, &refs[current_hook], module, TAI_ANY_LIBRARY, nid, func);
+    current_hook++;
 }
 
 int ksceCtrlSetSamplingMode_patched(SceCtrlPadInputMode mode) {
-	if (mode == SCE_CTRL_MODE_ANALOG) mode = SCE_CTRL_MODE_ANALOG_WIDE;
-	return TAI_CONTINUE(int, refs[2], mode);
+    if (mode == SCE_CTRL_MODE_ANALOG) mode = SCE_CTRL_MODE_ANALOG_WIDE;
+    return TAI_CONTINUE(int, refs[2], mode);
 }
 
 int ksceCtrlPeekBufferPositive_patched(int port, SceCtrlData *ctrl, int count) {
-	int ret = TAI_CONTINUE(int, refs[0], port, ctrl, count);
-	patchData((uint8_t*)ctrl);
-	return ret;
+    int ret = TAI_CONTINUE(int, refs[0], port, ctrl, count);
+    patchData((uint8_t*)ctrl);
+    return ret;
 }
 
 int ksceCtrlReadBufferPositive_patched(int port, SceCtrlData *ctrl, int count) {
-	int ret = TAI_CONTINUE(int, refs[1], port, ctrl, count);
-	patchData((uint8_t*)ctrl);
-	return ret;
+    int ret = TAI_CONTINUE(int, refs[1], port, ctrl, count);
+    patchData((uint8_t*)ctrl);
+    return ret;
 }
 
 void _start() __attribute__ ((weak, alias ("module_start")));
 int module_start(SceSize argc, const void *args) {
-	
-	// Setup stuffs
-	loadConfig();
-	
-	// Hooking functions
-	hookFunctionExport(0xEA1D3A34, ksceCtrlPeekBufferPositive_patched, "SceCtrl");
-	hookFunctionExport(0x9B96A1AA, ksceCtrlReadBufferPositive_patched, "SceCtrl");
-	if (apply_wide_patch) hookFunctionExport(0x80F5E418, ksceCtrlSetSamplingMode_patched, "SceCtrl");
-	
-	return SCE_KERNEL_START_SUCCESS;
+
+    // Setup stuffs
+    loadConfig();
+
+    // Hooking functions
+    hookFunctionExport(0xEA1D3A34, ksceCtrlPeekBufferPositive_patched, "SceCtrl");
+    hookFunctionExport(0x9B96A1AA, ksceCtrlReadBufferPositive_patched, "SceCtrl");
+    if (apply_wide_patch) hookFunctionExport(0x80F5E418, ksceCtrlSetSamplingMode_patched, "SceCtrl");
+
+    return SCE_KERNEL_START_SUCCESS;
 }
 
 int module_stop(SceSize argc, const void *args) {
 
-	// Freeing hooks
-	while (current_hook-- > 0){
-		taiHookReleaseForKernel(hooks[current_hook], refs[current_hook]);
-	}
-		
-	return SCE_KERNEL_STOP_SUCCESS;
-	
+    // Freeing hooks
+    while (current_hook-- > 0){
+        taiHookReleaseForKernel(hooks[current_hook], refs[current_hook]);
+    }
+
+    return SCE_KERNEL_STOP_SUCCESS;
+
 }
