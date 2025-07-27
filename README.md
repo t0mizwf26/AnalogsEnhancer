@@ -22,7 +22,7 @@ Which means: no inner or outer deadzone, no re-scaling, no ANALOG_WIDE mode.
 * Moved config file from **ux0:data/AnalogsEnhancer/config.txt** to **ur0:tai/AnalogsEnhancerKai.txt** (since it's now in ur0, edit with caution!)
 
 ### Bug Fixes
-* When re-scaling = ON, x / y can now properly reach MAX=255 (without some other fixes which skip 254), instead of just 254 no 255.
+* When re-scaling = ON, x / y can now properly reach MAX=255 (without skip 254).
 * Change CMakeLists.txt, using correct name "SceIofilemgrForDriver_stub" instead of "sceIofilemgrForDriver_stub", so the code can be compiled without error when using Linux (case-sensitive).
 
 ### How to use
