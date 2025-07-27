@@ -40,6 +40,6 @@ set_target_properties(AnalogsEnhancer
   PROPERTIES LINK_FLAGS "-nostdlib"
 )
 
-vita_create_self(AnalogsEnhancer.skprx AnalogsEnhancer
+vita_create_self(AnalogsEnhancerKai.skprx AnalogsEnhancer
   CONFIG ${CMAKE_SOURCE_DIR}/AnalogsEnhancer.yml
 )
