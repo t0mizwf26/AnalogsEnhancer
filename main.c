@@ -170,7 +170,7 @@ void loadConfig(void) {
         ksceIoRead(fd, buffer, 32);
         ksceIoClose(fd);
     // (Now if no config file present, everything disabled by default, including wide patch, stick works like normal)
-    }else sprintf(buffer, "left=0,128,n;right=0,127,n;n");
+    }else sprintf(buffer, "left=0,127,n;right=0,127,n;n");
     sscanf(buffer, "left=%lu,%lu,%c;right=%lu,%lu,%c;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &widePatch);
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
