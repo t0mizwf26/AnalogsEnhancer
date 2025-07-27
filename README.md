@@ -19,7 +19,7 @@ based on the original AnalogsEnhancer v1.1 (Commit 0629c4b) by Rinnegatamante.<b
 (1) Place AnalogsEnhancerKai.skprx in ur0:/tai/<br>
 (2) Install the plugin under *KERNEL in taiHen config file<br>
 *KERNEL<br>
-ux0:tai/AnalogsEnhancerKai.skprx<br>
+ur0:tai/AnalogsEnhancerKai.skprx<br>
 (3) Place AnalogsEnhancerKai.txt file in ur0:/tai/<br>
 (4) .txt config file contains config like:<br>
 left=0,127,n;right=0,127,n;n<br>
