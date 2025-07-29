@@ -11,17 +11,17 @@ static uint8_t current_hook = 0;
 static SceUID hooks[HOOKS_NUM];
 static tai_hook_ref_t refs[HOOKS_NUM];
 
-static uint32_t deadzoneLeft, deadzoneOuterLeft, deadzoneRight, deadzoneOuterRight;
+static uint32_t deadzoneLeft, deadzoneOuterLeft, slowTravelLeft, slowMaxLeft, deadzoneRight, deadzoneOuterRight, slowTravelRight, slowMaxRight;
 static char buffer[32];
 static char rescaleLeft, rescaleRight, widePatch;
 static uint8_t apply_wide_patch = 0;
 
-static void (*patchFuncLeft)(uint8_t *x, uint8_t *y, int dead, int deadOuter);
-static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead, int deadOuter);
+static void (*patchFuncLeft)(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax);
+static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax);
 
 // Courtesy of rsn8887
 // Thanks u/lizin5ths for outer deadzone idea
-void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
+void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax) {
     //radial and scaled deadzone
     //http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
     //input and output values go from 0...255;
@@ -95,14 +95,14 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
         // convert -127 ~ 128 back to 0 ~ 255
         *x = (uint8_t) (analogX + 127.0f);
         *y = (uint8_t) (analogY + 127.0f);
-    }else{
+    }else {
         // within inner deadzone, stick is centred
         *x = 127;
         *y = 127;
     }
 }
 
-void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
+void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax) {
 
     // stick disabled (stick always centre)
     if (dead > 126) {
@@ -157,26 +157,49 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
 }
 
 void patchData(uint8_t *data) {
-    patchFuncLeft(&data[12], &data[13], deadzoneLeft, deadzoneOuterLeft);
-    patchFuncRight(&data[14], &data[15], deadzoneRight, deadzoneOuterRight);
+    patchFuncLeft(&data[12], &data[13], deadzoneLeft, deadzoneOuterLeft, slowTravelLeft, slowMaxLeft);
+    patchFuncRight(&data[14], &data[15], deadzoneRight, deadzoneOuterRight, slowTravelRight, slowMaxRight);
 }
 
 void loadConfig(void) {
 
-    // (No longer needed since moved config to ur0:/tai)
-    // Just in case the folder doesn't exist
-    // ksceIoMkdir("ux0:data/AnalogsEnhancer", 0777);
-
-    // Loading generic config file
-    // (Now using ur0:/tai/AnalogsEnhancerKai.txt as config file)
-    // SceUID fd = ksceIoOpen("ux0:/data/AnalogsEnhancer/config.txt", SCE_O_RDONLY, 0777);
+    // try load config file from ur0:tai
     SceUID fd = ksceIoOpen("ur0:/tai/AnalogsEnhancerKai.txt", SCE_O_RDONLY, 0777);
     if (fd >= 0){
         ksceIoRead(fd, buffer, 32);
         ksceIoClose(fd);
-    // (Now if no config file present, everything disabled by default, including wide patch, stick works like normal)
-    }else sprintf(buffer, "left=0,127,n;right=0,127,n;n");
-    sscanf(buffer, "left=%lu,%lu,%c;right=%lu,%lu,%c;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &widePatch);
+    }else {
+        // when no config in ur0:tai, go check ux0:data/
+        // in case folder doesn't exist
+        ksceIoMkdir("ux0:data/AnalogsEnhancerKai", 0777);
+        fd = ksceIoOpen("ux0:/data/AnalogsEnhancerKai/config.txt", SCE_O_RDONLY, 0777);
+        if (fd >= 0){
+            ksceIoRead(fd, buffer, 32);
+            ksceIoClose(fd);
+        }else sprintf(buffer, "l=0,127,n,s=0,5;r=0,127,n,s=0,5;n");
+        // if no config file present too, everything disabled by default, sticks will work like normal
+    }
+    sscanf(buffer, "l=%lu,%lu,%c,s=%lu,%lu;r=%lu,%lu,%c,s=%lu,%lu;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &slowTravelLeft, &slowMaxLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &slowTravelRight, &slowMaxRight, &widePatch);
+
+    // Config Explained:
+    // l=0,127,n,s=0,5;r=0,127,n,s=0,5;n
+    // {
+    //     InnerDZ Edge > 0 = OFF
+    //     OuterDZ Edge > 0 or 127 = OFF
+    //     SlowMode Range > 0 = OFF
+    //     SlowMode Max Output > if "SlowMode Range = OFF" then OFF , if "SlowMode Range = ON" then ON & will be auto correct to at minimum 5
+    // }
+    // {
+    //     l={ Left InnerDZ Edge (0 ~ 126) }, { Left OuterDZ Edge (0 ~ 127) }, { Left Rescaling (y/n) }
+    //     ,
+    //     s={ Left SlowMode Range (0, 5 ~ "50% Non-DZ Usable Range") }, { Left SlowMode Max Output (5 ~ "Left SlowMode Range") }
+    //     ;
+    //     r={ Right InnerDZ Edge (0 ~ 126) }, { Right OuterDZ Edge (0 ~ 127) }, { Right Rescaling (y/n) }
+    //     ,
+    //     s={ Right SlowMode Range (0, 5 ~ "50% Non-DZ Usable Range" )}, { Right SlowMode Max Output (5 ~ "Right SlowMode Range") }
+    //     ;
+    //     { use ANALOG_WIDE mode (y/n) }
+    // }
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
     else patchFuncLeft = deadzoneAnalogs;
