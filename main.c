@@ -40,6 +40,8 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
     if (dead == 0 && deadOuter == 127) return;
 
     // ensure inner deadzone and outer deadzone never overlap
+    // unlike "void deadzoneAnalogs()", use "deadOuter = dead + 1" here, to avoid "deadOuter == dead"
+    // if "deadOuter == dead", may run into "a/0" (divide by 0) error in later code "(magnitude - deadZone) / ((maximum - deadZoneOuter) - deadZone)"
     if (deadOuter <= dead) deadOuter = dead + 1;
 
     float analogX = (float) *x - 127.0f;
@@ -48,7 +50,8 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
     float deadZoneOuter = 127.0f - (float) deadOuter;
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
 
-    if (magnitude >= deadZone){
+    // use ">" instead of ">=", since when "magnitude == deadZone", later "float scalingFactor = a*0/b = 0.0f", sitck just centred like else{}
+    if (magnitude > deadZone){
         //adjust maximum magnitude
         float absAnalogX = fabs(analogX);
         float absAnalogY = fabs(analogY);
@@ -115,7 +118,7 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
     if (dead == 0 && deadOuter == 127) return;
 
     // ensure inner deadzone and outer deadzone never overlap
-    if (deadOuter <= dead) deadOuter = dead + 1;
+    if (deadOuter < dead) deadOuter = dead;
 
     float analogX = (float) *x - 127.0f;
     float analogY = (float) *y - 127.0f;
@@ -124,16 +127,18 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
 
     // within inner deadzone, stick is centred
+    // the moment stick magnitude touches innerDZ edge, stick will be released from centre
     if (magnitude < deadZone){
         *x = 127;
         *y = 127;
     }
 
-    // out daedzone enabled and stick reach or exceed outer deadzone, stick working like 8-way digital (like d-pad)
-    // 176 and 78 means 127 +/- 49
-    // 127*sin(22.5deg) = about 49
+    // when outer daedzone enabled
     if (deadOuter != 127){
+        // the moment stick enter outerDZ, stick will change to pseudo 8-way digital (like d-pad)
+        // and if innerDZ edge == outerDZ edge, sitck will transform to 8-way directly when inner deadzone ends
         if (magnitude >= deadZoneOuter){
+            // 176 and 78 means 127 +/- 49, since 127*sin(22.5deg) = about 49
             if (*x >= 176) *x = 255;
             else if (*x <= 78) *x = 0;
             else *x = 127;
@@ -142,12 +147,12 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
             else *y = 127;
         }
     }
-    // By playing with inner and outer deadzone value, this will make analog into 8-way digital with customizable actuation point
-    // Diagonal directions (NE/SE/NW/SW) are only triggered when both x and y over +/- 49 
-    // Example 1: Inner Deadzone = 100 ; Outer Deadzone = 101
-    // >> Stick is now pure 8-way digital with actuation point at magnitude 101
+    // By playing with inner and outer deadzone value, this will make analog into pseudo 8-way digital with customizable actuation point
+    // Diagonal directions (NE/SE/NW/SW) are only triggered when both x and y over +/- 49
+    // Example 1: Inner Deadzone = 100 ; Outer Deadzone = 100
+    // >> Stick is now pure 8-way digital with actuation point "magnitude 100"
     // Example 2: Inner Deadzone = 10 ; Outer Deadzone = 150
-    // >> Stick working as analog with deadzone 10, with stick reach magnitude 150, stick change into 8-way digital
+    // >> Stick working as analog with deadzone 10, until 150, then stick transform into pseudo digital
 
 }
 
