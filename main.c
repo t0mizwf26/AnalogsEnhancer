@@ -50,6 +50,28 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     float deadZoneOuter = 127.0f - (float) deadOuter;
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
 
+    // check Slow Mode Range setting
+    // doesn't meet Slow Mode minimum travel range requirement, Slow Mode = OFF (not available)
+    if ((deadOuter-dead) < 10) slowTrv = 0;
+    // Slow Mode ON, but config is lower than minimun travel range, set to minimum range
+    else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
+    // Slow Mode ON, but config is higher than maximum travel range, set to maximum range
+    else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
+
+    float slowTravel = (float) slowTrv;
+
+    // when Slow Mode ON
+    if (slowTrv != 0){
+        // first, check Slow Mode Max Output setting
+        // slowMax legit range = 5 ~ slowTrv
+        if (slowMax < 5) slowMax = 5;
+        else if (slowMax > slowTrv) slowMax = slowTrv;
+        
+        // calculate slow mode output
+        float slowMaximum = (float) slowMax;
+        // slow mode, rescaling = ON
+    }
+    
     // use ">" instead of ">=", since when "magnitude == deadZone", later "float scalingFactor = a*0/b = 0.0f", sitck just centred like else{}
     if (magnitude > deadZone){
         //adjust maximum magnitude
@@ -133,6 +155,29 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
         *y = 127;
     }
 
+    // check Slow Mode Range setting
+    // doesn't meet Slow Mode minimum travel range requirement, Slow Mode = OFF (not available)
+    if ((deadOuter-dead) < 10) slowTrv = 0;
+    // Slow Mode ON, but config is lower than minimun travel range, set to minimum range
+    else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
+    // Slow Mode ON, but config is higher than maximum travel range, set to maximum range
+    else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
+
+    float slowTravel = (float) slowTrv;
+
+    // when Slow Mode ON
+    if (slowTrv != 0){
+        // first, check Slow Mode Max Output setting
+        // slowMax legit range = 5 ~ slowTrv
+        if (slowMax < 5) slowMax = 5;
+        else if (slowMax > slowTrv) slowMax = slowTrv;
+        
+        // calculate slow mode output
+        float slowMaximum = (float) slowMax;
+        // slow mode, rescaling = OFF, (magnitude == slowMaximum)
+    }
+
+    else 
     // when outer daedzone enabled
     if (deadOuter != 127){
         // the moment stick enter outerDZ, stick will change to pseudo 8-way digital (like d-pad)
