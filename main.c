@@ -65,7 +65,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     // [Step 4] Check Slow Mode config, if Magnitude within Slow Mode, calculate Slow Mode output
     // ensure inner deadzone and outer deadzone never overlap
     // unlike "void deadzoneAnalogs()", use "deadOuter = dead + 1" here, to avoid "deadOuter == dead"
-    // [!! WIP !!] // if "deadOuter == dead", may run into "a/0" (divide by 0) error in later rescaling code "(magnitude - deadZone) / ((maximum - deadZoneOuter) - deadZone)"
+    // if "deadOuter == dead", may run into "a/0" (divide by 0) error later in [Step 5] during "scalingFactor" calculation.
     if (deadOuter <= dead) deadOuter = dead + 1;
 
     // check Slow Mode Range setting
@@ -81,6 +81,11 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     // if Slow Mode OFF, logical rescaling output magnitude should start from mag(0) (aka 127,127 centre) instead of mag(slowMax)
     float slowMaximum = 0.0f;
 
+    // declare absAnalogX, absAnalogY, maximum for [Step 4] Slow Mode, [Step 5] Rescaling
+    float absAnalogX = fabs(analogX);
+    float absAnalogY = fabs(analogY);
+    float maximum;
+
     // when Slow Mode ON
     if (slowTrv != 0){
         // FIRST, check Slow Mode Max Output setting
@@ -93,8 +98,31 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         // THEN, calculate slow mode output
         // slow mode, rescaling = ON
         if (magnitude <= slowZoneEnd){
-            // [Work in Progress]
-            // blah, blah, blah
+            //adjust maximum magnitude
+            if (absAnalogX > absAnalogY)
+                maximum = sqrt(slowMaximum * slowMaximum + ((slowMaximum * analogY) / absAnalogX) * ((slowMaximum * analogY) / absAnalogX));
+            else
+                maximum = sqrt(slowMaximum * slowMaximum + ((slowMaximum * analogX) / absAnalogY) * ((slowMaximum * analogX) / absAnalogY));
+            if (maximum > 1.25f * slowMaximum) maximum = 1.25f * slowMaximum;
+            if (maximum < magnitude) maximum = magnitude;
+
+            // find scaled axis values with magnitudes between zero and maximum
+            float scalingFactor = maximum / magnitude * (magnitude - deadZone) / (maximum - deadZone);     
+            analogX = (analogX * scalingFactor);
+            analogY = (analogY * scalingFactor);
+
+            // clamp to ensure results will always lie between 0 and slowMaximum
+            float clampingFactor = 1.0f;
+            absAnalogX = fabs(analogX);
+            absAnalogY = fabs(analogY);
+            if (absAnalogX > slowMaximum || absAnalogY > slowMaximum){
+                if (absAnalogX > absAnalogY)
+                    clampingFactor = slowMaximum / absAnalogX;
+                else
+                    clampingFactor = slowMaximum / absAnalogY;
+            }
+            *x = (uint8_t) ((clampingFactor * analogX) + 127.0f);
+            *y = (uint8_t) ((clampingFactor * analogY) + 127.0f);
             return;
         }
     }
@@ -109,9 +137,6 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
             // blah, blah, blah
         
         //adjust maximum magnitude
-        float absAnalogX = fabs(analogX);
-        float absAnalogY = fabs(analogY);
-        float maximum;
         if (absAnalogX > absAnalogY)
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogY) / absAnalogX) * ((127.0f * analogY) / absAnalogX));
         else
@@ -215,10 +240,10 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
         float slowMaximum = (float) slowMax;
 
         // THEN, calculate slow mode output
-        // slow mode, rescaling = OFF, (output magnitude == slowMaximum)
+        // slow mode, rescaling = OFF, (output magnitude always == slowMaximum)
         if (magnitude <= deadZone + slowTravel){
             // (scalingFactor = slowMaximum / magnitude)
-            // in other words: target magnitude / actual magnitude
+            // in other words: target output magnitude (constant) / actual physical magnitude (variable)
             analogX = (analogX * (slowMaximum / magnitude));
             analogY = (analogY * (slowMaximum / magnitude));
             //and now, output magnitude = (sqrt(analogX^2 * analogY^2)) == slowMaximum
