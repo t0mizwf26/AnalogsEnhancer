@@ -227,7 +227,7 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
     // check Slow Mode Range setting
     // doesn't meet Slow Mode minimum travel range requirement, Slow Mode = OFF (not available)
     if ((deadOuter-dead) < 10) slowTrv = 0;
-    // Slow Mode ON, but config is lower than minimun travel range, set to minimum range
+    // Slow Mode ON, but config is lower than minimum travel range, set to minimum range
     else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
     // Slow Mode ON, but config is higher than maximum travel range, set to maximum range
     else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
@@ -250,7 +250,7 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
             analogY = (analogY * (slowMaximum / magnitude));
             //and now, output magnitude = (sqrt(analogX^2 * analogY^2)) == slowMaximum
             *x = (uint8_t) (analogX) + 127.0f;
-            *y = (uint8_t) (analogY) + 127.0f);
+            *y = (uint8_t) (analogY) + 127.0f;
             return;
         }
     }
