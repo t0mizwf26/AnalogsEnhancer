@@ -88,7 +88,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
 
     // when Slow Mode ON
     if (slowTrv != 0){
-        // FIRST, check Slow Mode Max Output setting
+        // FIRST, check Slow Mode Max output setting
         // slowMax legit range = 5 ~ slowTrv
         if (slowMax < 5) slowMax = 5;
         else if (slowMax > slowTrv) slowMax = slowTrv;
@@ -130,12 +130,14 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     // [Step 5] Mag beyond Inner-DZ & SlowMode, calculate rescaling output (w/ or w/o Outer-DZ)
     // for more readable rescaling code, convert outward (centre->edge) "deadOuter" into inward (edge->center) "deadZoneOuter"
     float deadZoneOuter = 127.0f - (float) deadOuter;
-    // reminder: "float slowZoneEnd" is "float (dead + slowTrv)", probably should come up with a better name, I guess...
-    if (magnitude > slowZoneEnd){
-
-            // [Work in Progress]
-            // blah, blah, blah
-        
+    if (slowTrv != 0){
+        // when slow mode ON, set new ("imaginary") inner deadzone value for scaling factor calculation
+        deadZone = maximum - deadZoneOuter - maximum * (maximum - deadZoneOuter - slowZoneEnd) / (maximum - slowMaximum);
+        // assume slow mode OFF, then the above line become:
+        // deadZone = maximum - deadZoneOuter - maaximum * (maximum - deadZoneOuter - (deadZone + 0) / (maximum - 0)
+        // >> no change, new inner deadzone = existing inner deadzone
+    }
+    if (magnitude > slowZoneEnd){       
         //adjust maximum magnitude
         if (absAnalogX > absAnalogY)
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogY) / absAnalogX) * ((127.0f * analogY) / absAnalogX));
@@ -146,7 +148,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         // So 255 (aka +128) can be reached
         if (maximum < magnitude) maximum = magnitude;
 
-        // find scaled axis values with magnitudes between zero and maximum (or outer deadzone if enabled)
+        // find scaled axis values with magnitudes between "slowMaximum" and maximum (or outer deadzone if enabled)
         float scalingFactor = maximum / magnitude * (magnitude - deadZone) / ((maximum - deadZoneOuter) - deadZone);
         analogX = (analogX * scalingFactor);
         analogY = (analogY * scalingFactor);
@@ -297,27 +299,27 @@ void loadConfig(void) {
         if (fd >= 0){
             ksceIoRead(fd, buffer, 32);
             ksceIoClose(fd);
-        }else sprintf(buffer, "l=0,127,n,s=0,5;r=0,127,n,s=0,5;n");
+        }else sprintf(buffer, "l=0,127,n,s=0,0;r=0,127,n,s=0,0;n");
         // if no config file present too, everything disabled by default, sticks will work like normal
     }
     sscanf(buffer, "l=%lu,%lu,%c,s=%lu,%lu;r=%lu,%lu,%c,s=%lu,%lu;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &slowTravelLeft, &slowMaxLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &slowTravelRight, &slowMaxRight, &widePatch);
 
     // Config Explained:
-    // l=0,127,n,s=0,5;r=0,127,n,s=0,5;n
+    // l=0,127,n,s=0,0;r=0,127,n,s=0,0;n
     // {
     //     InnerDZ Edge > 0 = OFF
     //     OuterDZ Edge > 0 or 127 = OFF
     //     SlowMode Range > 0 = OFF
-    //     SlowMode Max Output > if "SlowMode Range = OFF" then OFF , if "SlowMode Range = ON" then ON & will be auto correct to at minimum 5
+    //     SlowMode Max Output > if "SlowMode Range = OFF" then OFF , if "SlowMode Range = ON" then ON & will auto correct to at minimum 5
     // }
     // {
     //     l={ Left InnerDZ Edge (0 ~ 126) }, { Left OuterDZ Edge (0 ~ 127) }, { Left Rescaling (y/n) }
     //     ,
-    //     s={ Left SlowMode Range (0, 5 ~ "50% Non-DZ Usable Range") }, { Left SlowMode Max Output (5 ~ "Left SlowMode Range") }
+    //     s={ Left SlowMode Range (0, 5 ~ "50% Non-DZ Usable Range") }, { Left SlowMode Max Output (0, 5 ~ "Left SlowMode Range") }
     //     ;
     //     r={ Right InnerDZ Edge (0 ~ 126) }, { Right OuterDZ Edge (0 ~ 127) }, { Right Rescaling (y/n) }
     //     ,
-    //     s={ Right SlowMode Range (0, 5 ~ "50% Non-DZ Usable Range" )}, { Right SlowMode Max Output (5 ~ "Right SlowMode Range") }
+    //     s={ Right SlowMode Range (0, 5 ~ "50% Non-DZ Usable Range" )}, { Right SlowMode Max Output (0, 5 ~ "Right SlowMode Range") }
     //     ;
     //     { use ANALOG_WIDE mode (y/n) }
     // }
