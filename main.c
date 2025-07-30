@@ -26,6 +26,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     //http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
     //input and output values go from 0...255;
 
+    // [CASE 1] Full Deadzone, aways Centre
     // stick disabled (stick always centre)
     if (dead > 126) {
         *x = 127;
@@ -33,47 +34,75 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         return;
     }
 
+    // [CASE 2] If both Inner & Outer Deazone OFF, no more calculation needed.
     // outer deadzone disabled
     if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
-
     // both inner and outer deadzone disabled (stick works like normal)
     if (dead == 0 && deadOuter == 127) return;
 
-    // ensure inner deadzone and outer deadzone never overlap
-    // unlike "void deadzoneAnalogs()", use "deadOuter = dead + 1" here, to avoid "deadOuter == dead"
-    // if "deadOuter == dead", may run into "a/0" (divide by 0) error in later code "(magnitude - deadZone) / ((maximum - deadZoneOuter) - deadZone)"
-    if (deadOuter <= dead) deadOuter = dead + 1;
-
+    // [CASE 3] Calculate Magnitude, if Magnitude within Inner Deadzone, set output to Centre
     float analogX = (float) *x - 127.0f;
     float analogY = (float) *y - 127.0f;
-    float deadZone = (float) dead;
-    float deadZoneOuter = 127.0f - (float) deadOuter;
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
+
+        // after slowTrv value is checked later, "float slowEnd = float (dead + slowTrv)" will be the physical starting magnitude for rescaling
+        // instead of next line's old "float deadZone"
+        // float deadZone = (float) dead;
+
+    // within inner deadzone, stick is centred
+    // "<=" instead of "<" here for rescaling ON, since minimum deadOuter here is (dead + 1)
+    if (magnitude <= (float) dead){
+        *x = 127;
+        *y = 127;
+        return;
+    }
+
+    // [CASE 4] Check Slow Mode config, if Magnitude within Slow Mode, calculate Slow Mode logical output
+    // ensure inner deadzone and outer deadzone never overlap
+    // unlike "void deadzoneAnalogs()", use "deadOuter = dead + 1" here, to avoid "deadOuter == dead"
+    // if "deadOuter == dead", may run into "a/0" (divide by 0) error in later rescaling code "(magnitude - deadZone) / ((maximum - deadZoneOuter) - deadZone)"
+    if (deadOuter <= dead) deadOuter = dead + 1;
 
     // check Slow Mode Range setting
     // doesn't meet Slow Mode minimum travel range requirement, Slow Mode = OFF (not available)
     if ((deadOuter-dead) < 10) slowTrv = 0;
     // Slow Mode ON, but config is lower than minimun travel range, set to minimum range
     else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
-    // Slow Mode ON, but config is higher than maximum travel range, set to maximum range
+    // Slow Mode ON, but config is higher than maximum travel range (50% of usable travel), set to maximum range
     else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
 
-    float slowTravel = (float) slowTrv;
+    float slowEnd = float (dead + slowTrv);
+
+    // if Slow Mode OFF, logical rescaling output magnitude should start from mag(0) (aka 127,127 centre) instead of mag(slowMax)
+    float slowMaximum = 0.0f;
 
     // when Slow Mode ON
     if (slowTrv != 0){
-        // first, check Slow Mode Max Output setting
+        // FIRST, check Slow Mode Max Output setting
         // slowMax legit range = 5 ~ slowTrv
         if (slowMax < 5) slowMax = 5;
         else if (slowMax > slowTrv) slowMax = slowTrv;
-        
-        // calculate slow mode output
-        float slowMaximum = (float) slowMax;
+        float slowTravel = (float) slowTrv;
+        slowMaximum = (float) slowMax;
+
+        // THEN, calculate slow mode output
         // slow mode, rescaling = ON
+        if (magnitude <= slowEnd){
+            // [Work in Progress]
+            // blah, blah, blah
+            return;
+        }
     }
-    
-    // use ">" instead of ">=", since when "magnitude == deadZone", later "float scalingFactor = a*0/b = 0.0f", sitck just centred like else{}
-    if (magnitude > deadZone){
+
+    // [CASE 5] Finally, Magnitude is beyond Inner-DZ & SlowMode range, calculate rescaling output
+    // for more readable rescaling code, convert outward (centre->edge) "deadOuter" into inward (edge->center) "deadZoneOuter"
+    float deadZoneOuter = 127.0f - (float) deadOuter;
+    // reminder: "float slowEnd" is "float (dead + slowTrv)", probably should come up with a better name I guess...
+    if (magnitude > slowEnd){
+
+            // [Work in Progress]
+            // blah, blah, blah
+        
         //adjust maximum magnitude
         float absAnalogX = fabs(analogX);
         float absAnalogY = fabs(analogY);
@@ -117,15 +146,13 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         // convert -127 ~ 128 back to 0 ~ 255
         *x = (uint8_t) (analogX + 127.0f);
         *y = (uint8_t) (analogY + 127.0f);
-    }else {
-        // within inner deadzone, stick is centred
-        *x = 127;
-        *y = 127;
+        return;
     }
 }
 
 void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax) {
 
+    // [CASE 1] Full Deadzone, aways Centre
     // stick disabled (stick always centre)
     if (dead > 126) {
         *x = 127;
@@ -133,27 +160,32 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
         return;
     }
 
+    // [CASE 2] If both Inner & Outer Deazone OFF, no more calculation needed.
     // outer deadzone disabled
     if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
-
     // both inner and outer deadzone disabled (stick works like normal)
     if (dead == 0 && deadOuter == 127) return;
 
-    // ensure inner deadzone and outer deadzone never overlap
-    if (deadOuter < dead) deadOuter = dead;
-
+    // [CASE 3] Calculate Magnitude, if Magnitude within Inner Deadzone, set output to Centre
     float analogX = (float) *x - 127.0f;
     float analogY = (float) *y - 127.0f;
-    float deadZone = (float) dead;
-    float deadZoneOuter = (float) deadOuter;
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
 
+        // after slowTrv value is checked later, "float slowEnd = float (dead + slowTrv)" will be the physical starting magnitude for rescaling
+        // instead of next line's old "float deadZone"
+        // float deadZone = (float) dead;
+
     // within inner deadzone, stick is centred
-    // the moment stick magnitude touches innerDZ edge, stick will be released from centre
+    // "<" instead of "<=" here for rescaling OFF 
     if (magnitude < deadZone){
         *x = 127;
         *y = 127;
+        return;
     }
+
+    // [CASE 4] Check Slow Mode config, if Magnitude within Slow Mode, calculate Slow Mode logical output
+    // ensure inner deadzone and outer deadzone never overlap
+    if (deadOuter < dead) deadOuter = dead;
 
     // check Slow Mode Range setting
     // doesn't meet Slow Mode minimum travel range requirement, Slow Mode = OFF (not available)
@@ -163,25 +195,54 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
     // Slow Mode ON, but config is higher than maximum travel range, set to maximum range
     else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
 
-    float slowTravel = (float) slowTrv;
-
     // when Slow Mode ON
     if (slowTrv != 0){
-        // first, check Slow Mode Max Output setting
+        // FIRST, check Slow Mode Max Output setting
         // slowMax legit range = 5 ~ slowTrv
         if (slowMax < 5) slowMax = 5;
         else if (slowMax > slowTrv) slowMax = slowTrv;
-        
-        // calculate slow mode output
+        float slowTravel = (float) slowTrv;
         float slowMaximum = (float) slowMax;
-        // slow mode, rescaling = OFF, (magnitude == slowMaximum)
-    }
 
-    else 
+        // THEN, calculate slow mode output
+        // slow mode, rescaling = OFF, (magnitude == slowMaximum)
+        if (magnitude <= deadZone + slowTravel){
+
+            // [Work in Progress]
+            // blah, blah, blah
+            
+            //set maximum magnitude
+            float absAnalogX = fabs(analogX);
+            float absAnalogY = fabs(analogY);
+            float maximum = slowMaximum;
+
+            // find scaled axis values with magnitudes between zero and maximum (or outer deadzone if enabled)
+            float scalingFactor = maximum / magnitude * (magnitude - deadZone) / ((maximum - deadZoneOuter) - deadZone);
+            analogX = (analogX * scalingFactor);
+            analogY = (analogY * scalingFactor);
+
+            // clamp to ensure results will always lower than slow mode maximum
+            float clampingFactor = 1.0f;
+            absAnalogX = fabs(analogX);
+            absAnalogY = fabs(analogY);
+
+            if (absAnalogX > maximum || absAnalogY > maximum){
+                if (absAnalogX > absAnalogY)
+                    clampingFactor = maximum / absAnalogX;
+                else
+                    clampingFactor = maximum / absAnalogY;
+            }
+            *x = (uint8_t) ((clampingFactor * analogX) + 127.0f);
+            *y = (uint8_t) ((clampingFactor * analogY) + 127.0f);
+            return;
+        }
+    }
+    
+    // [CASE 5+6] Finally, Magnitude is beyond Inner-DZ & SlowMode range, check if stick output normal value (CASE 5) or transform into pseudo 8-way digital (CASE 6)
+    float deadZoneOuter = (float) deadOuter;
     // when outer daedzone enabled
     if (deadOuter != 127){
-        // the moment stick enter outerDZ, stick will change to pseudo 8-way digital (like d-pad)
-        // and if innerDZ edge == outerDZ edge, sitck will transform to 8-way directly when inner deadzone ends
+        // within outer-DZ, stick turn into pseudo 8-way digital
         if (magnitude >= deadZoneOuter){
             // 176 and 78 means 127 +/- 49, since 127*sin(22.5deg) = about 49
             if (*x >= 176) *x = 255;
@@ -190,6 +251,7 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
             if (*y >= 176) *y = 255;
             else if (*y <= 78) *y = 0;
             else *y = 127;
+            return;
         }
     }
     // By playing with inner and outer deadzone value, this will make analog into pseudo 8-way digital with customizable actuation point
@@ -198,7 +260,6 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
     // >> Stick is now pure 8-way digital with actuation point "magnitude 100"
     // Example 2: Inner Deadzone = 10 ; Outer Deadzone = 150
     // >> Stick working as analog with deadzone 10, until 150, then stick transform into pseudo digital
-
 }
 
 void patchData(uint8_t *data) {
