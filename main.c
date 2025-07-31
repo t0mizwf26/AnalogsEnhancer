@@ -64,9 +64,9 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     // check if slow mode config is legit
     // doesn't meet minimum requirement (non-dz range < 10), mode unavailable, force slow mode = off
     if ((deadOuter-dead) < 10) slowTrv = 0;
-    // slow mode = on, but lower than minimum range (5), auto correct to minimum
+    // slow mode = on, but lower than min range (5), auto correct to min
     else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
-    // slow mode = on, but higher than maximum range (50% of non-dz range), auto correct to maximum
+    // slow mode = on, but higher than max range (50% of non-dz range), auto correct to max
     else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
 
     float slowZoneEnd = float (dead + slowTrv);
@@ -74,7 +74,6 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
 
     float absAnalogX = fabs(analogX);
     float absAnalogY = fabs(analogY);
-    float maximum;
 
     // slow mode for rescaleAnalogs(), rescale output using slow mode config
     if (slowTrv != 0){
@@ -86,16 +85,8 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
 
         // calculate slow mode output
         if (magnitude <= slowZoneEnd){
-            //adjust maximum magnitude
-            if (absAnalogX > absAnalogY)
-                maximum = sqrt(slowMaximum * slowMaximum + ((slowMaximum * analogY) / absAnalogX) * ((slowMaximum * analogY) / absAnalogX));
-            else
-                maximum = sqrt(slowMaximum * slowMaximum + ((slowMaximum * analogX) / absAnalogY) * ((slowMaximum * analogX) / absAnalogY));
-            if (maximum > 1.25f * slowMaximum) maximum = 1.25f * slowMaximum;
-            if (maximum < magnitude) maximum = magnitude;
-
-            // find scaled axis values with magnitudes between zero and maximum
-            float scalingFactor = maximum / magnitude * (magnitude - deadZone) / (maximum - deadZone);     
+            // find scaled axis values with magnitudes between zero and slowMaximum
+            float scalingFactor = (slowZoneEnd / magnitude) * ((magnitude - deadZone) / slowTravel) * (slowMaximum / slowZoneEnd);
             analogX = (analogX * scalingFactor);
             analogY = (analogY * scalingFactor);
 
@@ -117,14 +108,15 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
 
     // [step 5] rescaling, outer deadzone
 
-    float deadZoneOuter = 127.0f - (float) deadOuter;
+    float deadZoneOuter = (float) deadOuter;
 
     // if slow mode = on, set "imaginary" inner deadzone value for scaling factor calculation
     if (slowTrv != 0){
-        deadZone = maximum - deadZoneOuter - maximum * (maximum - deadZoneOuter - slowZoneEnd) / (maximum - slowMaximum);
+        deadZone = deadZoneOuter - 127.0f * (deadZoneOuter - slowZoneEnd) / (127.0f - slowMaximum);
     }
-    if (magnitude > slowZoneEnd){       
+    if (magnitude > slowZoneEnd){
         //adjust maximum magnitude
+        float maximum;
         if (absAnalogX > absAnalogY)
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogY) / absAnalogX) * ((127.0f * analogY) / absAnalogX));
         else
@@ -134,7 +126,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         if (maximum < magnitude) maximum = magnitude;
 
         // find scaled axis values with magnitudes between slow mode boundary and maximum
-        float scalingFactor = maximum / magnitude * (magnitude - deadZone) / ((maximum - deadZoneOuter) - deadZone);
+        float scalingFactor = maximum / magnitude * (magnitude - deadZone) / ((maximum - (127.0f - deadZoneOuter)) - deadZone);
         analogX = (analogX * scalingFactor);
         analogY = (analogY * scalingFactor);
 
@@ -205,9 +197,9 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
     // check if slow mode config is legit
     // doesn't meet minimum requirement (non-dz range < 10), mode unavailable, force slow mode = off
     if ((deadOuter-dead) < 10) slowTrv = 0;
-    // slow mode = on, but lower than minimum range (5), auto correct to minimum
+    // slow mode = on, but lower than min range (5), auto correct to min
     else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
-    // slow mode = on, but higher than maximum range (50% of non-dz range), auto correct to maximum
+    // slow mode = on, but higher than max range (50% of non-dz range), auto correct to max
     else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
 
     // slow mode for deadzoneAnalogs(), always output magnitude slow mode max
@@ -289,11 +281,12 @@ void loadConfig(void) {
     //     { use ANALOG_WIDE mode (y/n) }
     // }
     // {
-    //     inner dz boundary = 0 >> inner dz OFF
-    //     inner dz boundary = 126 >> stick always centre (127,127)
-    //     outer dz boundary = 0 or 127 >> outer dz OFF
-    //     slow mode boundary = 0 >> slow mode OFF
-    //     slow mode max output >> when slow mode ON, auto correct to legit min or max 
+    //     inner dz boundary = 0 >> inner dz OFF ; = 126 >> always centre (x=127,y=127)
+    //     outer dz boundary = 0 or = 127 >> outer dz OFF
+    //     use rescaling >> y = yes, n = no
+    //     slow mode boundary = 0 >> slow mode OFF ; inner dz OFF && outer dz OFF >> slow mode OFF ; "50% of non-dz range" less than 5 >> slow mode OFF
+    //     slow mode max output >> when slow mode ON && slow mode max output value out of range, will auto correct to legit min or max
+    //     use ANALOG_WIDE mode >> y = yes, n = no
     // }
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
