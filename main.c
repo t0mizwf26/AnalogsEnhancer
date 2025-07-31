@@ -37,6 +37,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     // [step 2] check if both deadzones off
 
     // outer deadzone on/off check
+    if (dead < 0) dead = 0;
     if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
     // if both deadzones are off, return
     if (dead == 0 && deadOuter == 127) return;
@@ -178,6 +179,7 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
     // [step 2] check if both deadzones off
 
     // outer deadzone on/off check
+    if (dead < 0) dead = 0;
     if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
     // if both deadzones are off, return
     if (dead == 0 && deadOuter == 127) return;
