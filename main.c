@@ -154,25 +154,22 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         analogY = (analogY * scalingFactor);
 
         // clamp to ensure results will always lie between 0 and 255
-        float clampingFactor = 1.0f;
         absAnalogX = fabs(analogX);
         absAnalogY = fabs(analogY);
-
         // use 128.0f instead of 127.0f, so the allowed range is (temporarily) -128 to 128 (i.e. -1 to 255) instead of -127 to 127 (i.e. 0 to 254)
         if (absAnalogX > 128.0f || absAnalogY > 128.0f){
-            if (absAnalogX > absAnalogY)
-                clampingFactor = 128.0f / absAnalogX;
-            else
-                clampingFactor = 128.0f / absAnalogY;
-        }
+            float clampingFactor = 1.0f;
+            if (absAnalogX > absAnalogY) clampingFactor = 128.0f / absAnalogX;
+            else clampingFactor = 128.0f / absAnalogY;
 
-        analogX = (clampingFactor * analogX);
-        analogY = (clampingFactor * analogY);
+            analogX = (clampingFactor * analogX);
+            analogY = (clampingFactor * analogY);
 
-        // use clamping factor 0.992188f (= 127.0f / 128.0f) to fix '< -127' (i.e. '< 0') issue introduced by above code, so the range is no longer -1 to 255 but 0 to 255
-        if (analogX < -127.0f || analogY < -127.0f){
-            analogX = 0.992188f * analogX;
-            analogY = 0.992188f * analogY;
+            // use clamping factor 0.992188f (= 127.0f / 128.0f) to fix '< -127' (i.e. '< 0') issue introduced by above code, so the range is no longer -1 to 255 but 0 to 255
+            if (analogX < -127.0f || analogY < -127.0f){
+                analogX = 0.992188f * analogX;
+                analogY = 0.992188f * analogY;
+            }
         }
 
         // convert -127 ~ 128 back to 0 ~ 255
