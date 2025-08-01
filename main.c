@@ -207,14 +207,14 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
         // check if slow mode max output setting is legit (5 ~ slowTrv), auto correct to min or max
         if (slowMax < 5) slowMax = 5;
         else if (slowMax > slowTrv) slowMax = slowTrv;
-        float slowTravel = (float) slowTrv;
+        float slowZoneEnd = (float) (dead + slowTrv);
         float slowMaximum = (float) slowMax;
 
         // calculate slow mode output
-        if (magnitude <= deadZone + slowTravel){
-            // scalingFactor = slowMaximum / magnitude
-            analogX = (analogX * (slowMaximum / magnitude));
-            analogY = (analogY * (slowMaximum / magnitude));
+        if (magnitude <= slowZoneEnd){
+            float scalingFactor = slowMaximum / magnitude;
+            analogX = (analogX * scalingFactor);
+            analogY = (analogY * scalingFactor);
             *x = (uint8_t) (analogX) + 127.0f;
             *y = (uint8_t) (analogY) + 127.0f;
             return;
