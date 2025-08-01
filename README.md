@@ -141,7 +141,7 @@ In this particular example, within Slow Mode range (32), the output magnitude wi
 #### 4.3) Have some fun
 
 ``l=16,80,n,s=32,8;r=16,80,n,s=32,8;n``  
-Who's going do this?  
+Who's going to do this?  
 
 ![l=16,80,n,s=32,8;r=16,80,n,s=32,8;n](https://github.com/user-attachments/assets/391ce4da-e428-46b5-be93-5e1bf828e5ab)
 
@@ -177,35 +177,35 @@ Now, we could see **Left Stick** and **Right Stick** configs sharing the same st
 
 Each part means:  
 
-| Config      | Meaning                               |
-| ----------- | ------------------------------------- |
-| (/r)=0,127, | Inner Dead Zone, Outer Dead Zone      |
-| n,          | Rescaling (y=ON ; n=OFF)              |
-| s=0,0;      | Slow Mode Range, Slow Mode Max Output |
-| ----------- | ------------------------------------- |
-| n           | **5) ANALOG_WIDE**, (y=ON ; n=OFF)    |
+| Config       | Meaning                               |
+| ------------ | ------------------------------------- |
+| l(/r)=0,127, | Inner Dead Zone, Outer Dead Zone      |
+| n,           | Rescaling (y=ON ; n=OFF)              |
+| s=0,0;       | Slow Mode Range, Slow Mode Max Output |
+| ------------ | ------------------------------------- |
+| n            | **5) ANALOG_WIDE**, (y=ON ; n=OFF)    |
 
 For each non-"y/n" config:  
 
-| Config               | Legit Range When "ON"                 | Special Cases (OFF switch etc.)                                                  |
-| -------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
-| Inner Dead Zone      | 1 ~ 126                               | **0** : Inner DZ **OFF**                                                         |
-|                      |                                       | **> 126** : **Stick Disabled** (Always Centre)                                   |
-| -------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
-| Outer Dead Zone      | 1 ~ 126                               | **0** or **127** : Outer DZ **OFF**                                              |
-|                      |                                       | Never overlap with Inner DZ, should **Autocorrect if Outer DZ < Inner DZ**       |
-| -------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
-| Slow Mode Range      | 5 ~ "50% Non-DZ range"                | **0** : Slow Mode **OFF**                                                        |
-|                      |                                       | "**50% Non-DZ range**" means **0.5 * (Outer DZ - Inner DZ)**                     |
-|                      |                                       | Should **Autocorrect to Legit Range**                                            |
-|                      |                                       | If **both Inner DZ & Outer DZ** are **OFF**, **Slow Mode is forced OFF**         |
-|                      |                                       | If **0.5 * (Outer DZ - Inner DZ)** lower than **5**, **Slow Mode is forced OFF** |
-| -------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
-| Slow Mode Max Output | 5 ~ "current S-Mode Range config"     | Should **Autocorrect to Legit Range**                                            |
+| Config               | Legit Range if "ON"    | Special Cases (switch OFF, etc.)                              |
+| -------------------- | ---------------------- | ------------------------------------------------------------- |
+| Inner Dead Zone      | 1 ~ 126                | **0** : Inner DZ **OFF**                                      |
+|                      |                        | **> 126** : **Stick Disabled** (Always Centre)                |
+| -------------------- | ---------------------- | ------------------------------------------------------------- |
+| Outer Dead Zone      | 1 ~ 126                | **0** or **127** : Outer DZ **OFF**                           |
+|                      |                        | Never overlap, **Autocorrect if Outer DZ < Inner DZ**         |
+| -------------------- | ---------------------- | ------------------------------------------------------------- |
+| Slow Mode Range      | 5 ~ "50% Non-DZ range" | **0** : Slow Mode **OFF**                                     |
+|                      |                        | "**50% Non-DZ range**" means **0.5 * (Outer DZ - Inner DZ)**  |
+|                      |                        | **Autocorrect to Legit Range**                                |
+|                      |                        | If **both Inner DZ & Outer DZ** = **OFF**, **Slow Mode OFF**  |
+|                      |                        | If **0.5 * (Outer DZ - Inner DZ)** < **5**, **Slow Mode OFF** |
+| -------------------- | ---------------------- | ------------------------------------------------------------- |
+| Slow Mode Max Output | 5 ~ "Slow Mode Range"  | **Autocorrect to Legit Range**                                |
 
 Eagle-eyed readers might spot in **4.1) Slow Mode - Rescaling On**  
 ``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n``  
-``s=32,16`` will get autocorrected to ``s=31,16``  
+**32 > (127-64)/2**, ``s=32,16`` will get autocorrected to ``s=31,16``  
 
 ## Version History
 
@@ -227,4 +227,4 @@ See the LICENSE.md file for details.
 * [Rinnegatamante](https://github.com/Rinnegatamante), for the original plugin
 * [yakit4k0](https://github.com/yakit4k0), for compiling, testing, and helping to implement Outer Dead Zone & Slow Mode
 * u/lizin5ths, for the idea of Outer Dead Zone (fork [Haasman0/AnalogsEnhancer](https://github.com/Haasman0/AnalogsEnhancer))
-* [HENkaku 変革](https://henkaku.xyz/)
+* [HENkaku 変革](https://henkaku.xyz/) / [Vita SDK](https://vitasdk.org/) Community
