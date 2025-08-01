@@ -11,47 +11,111 @@ static uint8_t current_hook = 0;
 static SceUID hooks[HOOKS_NUM];
 static tai_hook_ref_t refs[HOOKS_NUM];
 
-static uint32_t deadzoneLeft, deadzoneOuterLeft, deadzoneRight, deadzoneOuterRight;
-static char buffer[32];
+static uint32_t deadzoneLeft, deadzoneOuterLeft, slowTravelLeft, slowMaxLeft, deadzoneRight, deadzoneOuterRight, slowTravelRight, slowMaxRight;
+static char buffer[64];
 static char rescaleLeft, rescaleRight, widePatch;
 static uint8_t apply_wide_patch = 0;
 
-static void (*patchFuncLeft)(uint8_t *x, uint8_t *y, int dead, int deadOuter);
-static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead, int deadOuter);
+static void (*patchFuncLeft)(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax);
+static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax);
 
 // Courtesy of rsn8887
 // Thanks u/lizin5ths for outer deadzone idea
-void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
+void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax) {
     //radial and scaled deadzone
     //http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
     //input and output values go from 0...255;
 
-    // stick disabled (stick always centre)
+    // [step 1] deadzone covers the entire range, always centre
+
     if (dead > 126) {
         *x = 127;
         *y = 127;
         return;
     }
 
-    // outer deadzone disabled
-    if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
+    // [step 2] check if both deadzones off
 
-    // both inner and outer deadzone disabled (stick works like normal)
+    // outer deadzone on/off check
+    if (dead < 0) dead = 0;
+    if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
+    // if both deadzones are off, return
     if (dead == 0 && deadOuter == 127) return;
 
-    // ensure inner deadzone and outer deadzone never overlap
-    if (deadOuter <= dead) deadOuter = dead + 1;
+    // [step 3] check if stick within inner deadzone range
 
     float analogX = (float) *x - 127.0f;
     float analogY = (float) *y - 127.0f;
-    float deadZone = (float) dead;
-    float deadZoneOuter = 127.0f - (float) deadOuter;
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
+    float deadZone = (float) dead;
+    // for rescaleAnalogs(), use "<=" instead of "<", since "deadOuter >= dead + 1"
+    if (magnitude <= deadZone){
+        *x = 127;
+        *y = 127;
+        return;
+    }
 
-    if (magnitude >= deadZone){
+    // [step 4] check if stick within slow mode range
+
+    // ensure inner deadzone and outer deadzone not overlapping
+    // "deadOuter = dead + 1" to avoid "deadOuter == dead" which would cause "/0" (divide by 0) error later in [step 5]
+    if (deadOuter <= dead) deadOuter = dead + 1;
+
+    // check if slow mode config is legit
+    // doesn't meet minimum requirement (non-dz range < 10), mode unavailable, force slow mode = off
+    if ((deadOuter - dead) < 10) slowTrv = 0;
+    // slow mode = on, but lower than min range (5), auto correct to min
+    else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
+    // slow mode = on, but higher than max range (50% of non-dz range), auto correct to max
+    else if (slowTrv > (deadOuter - dead) / 2) slowTrv = (deadOuter - dead) / 2;
+
+    float slowZoneEnd = (float) (dead + slowTrv);
+    float slowMaximum = 0.0f;
+
+    float absAnalogX = fabs(analogX);
+    float absAnalogY = fabs(analogY);
+
+    // slow mode for rescaleAnalogs(), rescale output using slow mode config
+    if (slowTrv != 0){
+        // check if slow mode max output setting is legit (5 ~ slowTrv), auto correct to min or max
+        if (slowMax < 5) slowMax = 5;
+        else if (slowMax > slowTrv) slowMax = slowTrv;
+        float slowTravel = (float) slowTrv;
+        slowMaximum = (float) slowMax;
+
+        // calculate slow mode output
+        if (magnitude <= slowZoneEnd){
+            // find scaled axis values with magnitudes between zero and slowMaximum
+            float scalingFactor = (slowZoneEnd / magnitude) * ((magnitude - deadZone) / slowTravel) * (slowMaximum / slowZoneEnd);
+            analogX = (analogX * scalingFactor);
+            analogY = (analogY * scalingFactor);
+
+            // clamp to ensure results will always lie between 0 and slowMaximum
+            float clampingFactor = 1.0f;
+            absAnalogX = fabs(analogX);
+            absAnalogY = fabs(analogY);
+            if (absAnalogX > slowMaximum || absAnalogY > slowMaximum){
+                if (absAnalogX > absAnalogY)
+                    clampingFactor = slowMaximum / absAnalogX;
+                else
+                    clampingFactor = slowMaximum / absAnalogY;
+            }
+            *x = (uint8_t) ((clampingFactor * analogX) + 127.0f);
+            *y = (uint8_t) ((clampingFactor * analogY) + 127.0f);
+            return;
+        }
+    }
+
+    // [step 5] rescaling, outer deadzone
+
+    float deadZoneOuter = (float) deadOuter;
+
+    // if slow mode = on, set "imaginary" inner deadzone value for scaling factor calculation
+    if (slowTrv != 0){
+        deadZone = deadZoneOuter - 127.0f * (deadZoneOuter - slowZoneEnd) / (127.0f - slowMaximum);
+    }
+    if (magnitude > slowZoneEnd){
         //adjust maximum magnitude
-        float absAnalogX = fabs(analogX);
-        float absAnalogY = fabs(analogY);
         float maximum;
         if (absAnalogX > absAnalogY)
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogY) / absAnalogX) * ((127.0f * analogY) / absAnalogX));
@@ -59,126 +123,175 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogX) / absAnalogY) * ((127.0f * analogX) / absAnalogY));
 
         if (maximum > 1.25f * 127.0f) maximum = 1.25f * 127.0f;
-        // So 255 (aka +128) can be reached
         if (maximum < magnitude) maximum = magnitude;
 
-        // find scaled axis values with magnitudes between zero and maximum (or outer deadzone if enabled)
-        float scalingFactor = maximum / magnitude * (magnitude - deadZone) / ((maximum - deadZoneOuter) - deadZone);
+        // find scaled axis values with magnitudes between slow mode boundary and maximum
+        float scalingFactor = maximum / magnitude * (magnitude - deadZone) / ((maximum - (127.0f - deadZoneOuter)) - deadZone);
         analogX = (analogX * scalingFactor);
         analogY = (analogY * scalingFactor);
 
         // clamp to ensure results will always lie between 0 and 255
-        float clampingFactor = 1.0f;
         absAnalogX = fabs(analogX);
         absAnalogY = fabs(analogY);
-
-        // use 128.0f instead of 127.0f, so the allowed range is (temporarily) -128 to 128 (i.e. -1 to 255) instead of -127 to 127 (i.e. 0 to 254)
+        // check if result within range "-128 ~ 128" (-1 ~ 255)
         if (absAnalogX > 128.0f || absAnalogY > 128.0f){
-            if (absAnalogX > absAnalogY)
-                clampingFactor = 128.0f / absAnalogX;
-            else
-                clampingFactor = 128.0f / absAnalogY;
+            float clampingFactor = 1.0f;
+            if (absAnalogX > absAnalogY) clampingFactor = 128.0f / absAnalogX;
+            else clampingFactor = 128.0f / absAnalogY;
+
+            analogX = (clampingFactor * analogX);
+            analogY = (clampingFactor * analogY);
+
+            // when "result < -127", use 0.992188f (= 127.0f / 128.0f) to bring it back to -127 (0)
+            if (analogX < -127.0f || analogY < -127.0f){
+                analogX = 0.992188f * analogX;
+                analogY = 0.992188f * analogY;
+            }
         }
 
-        analogX = (clampingFactor * analogX);
-        analogY = (clampingFactor * analogY);
-
-        // use clamping factor 0.992188f (= 127.0f / 128.0f) to fix '< -127' (i.e. '< 0') issue introduced by above code, so the range is no longer -1 to 255 but 0 to 255
-        if (analogX < -127.0f || analogY < -127.0f){
-            analogX = 0.992188f * analogX;
-            analogY = 0.992188f * analogY;
-        }
-
-        // convert -127 ~ 128 back to 0 ~ 255
+        // convert results back to 0 ~ 255 from -127 ~ 128
         *x = (uint8_t) (analogX + 127.0f);
         *y = (uint8_t) (analogY + 127.0f);
-    }else{
-        // within inner deadzone, stick is centred
-        *x = 127;
-        *y = 127;
+        return;
     }
+    // (debug) something is wrong if code execution ended up here
+    // return;
 }
 
-void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter) {
+void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax) {
 
-    // stick disabled (stick always centre)
+    // [step 1] deadzone covers the entire range, always centre
+
     if (dead > 126) {
         *x = 127;
         *y = 127;
         return;
     }
 
-    // outer deadzone disabled
-    if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
+    // [step 2] check if both deadzones off
 
-    // both inner and outer deadzone disabled (stick works like normal)
+    // outer deadzone on/off check
+    if (dead < 0) dead = 0;
+    if (deadOuter <= 0 || deadOuter > 127) deadOuter = 127;
+    // if both deadzones are off, return
     if (dead == 0 && deadOuter == 127) return;
 
-    // ensure inner deadzone and outer deadzone never overlap
-    if (deadOuter <= dead) deadOuter = dead + 1;
+    // [step 3] check if stick within inner deadzone range
 
     float analogX = (float) *x - 127.0f;
     float analogY = (float) *y - 127.0f;
-    float deadZone = (float) dead;
-    float deadZoneOuter = (float) deadOuter;
     float magnitude = sqrt(analogX * analogX + analogY * analogY);
-
-    // within inner deadzone, stick is centred
+    float deadZone = (float) dead;
+    // for deadzoneAnalogs(), use "<" instead of "<=", since "deadOuter >= dead"
     if (magnitude < deadZone){
         *x = 127;
         *y = 127;
+        return;
     }
 
-    // out daedzone enabled and stick reach or exceed outer deadzone, stick working like 8-way digital (like d-pad)
-    // 176 and 78 means 127 +/- 49
-    // 127*sin(22.5deg) = about 49
+    // [step 4] check if stick within slow mode range
+
+    // ensure inner deadzone and outer deadzone not overlapping
+    if (deadOuter < dead) deadOuter = dead;
+
+    // check if slow mode config is legit
+    // doesn't meet minimum requirement (non-dz range < 10), mode unavailable, force slow mode = off
+    if ((deadOuter - dead) < 10) slowTrv = 0;
+    // slow mode = on, but lower than min range (5), auto correct to min
+    else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
+    // slow mode = on, but higher than max range (50% of non-dz range), auto correct to max
+    else if (slowTrv > (deadOuter - dead) / 2) slowTrv = (deadOuter - dead) / 2;
+
+    // slow mode for deadzoneAnalogs(), always output magnitude slow mode max
+    if (slowTrv != 0){
+        // check if slow mode max output setting is legit (5 ~ slowTrv), auto correct to min or max
+        if (slowMax < 5) slowMax = 5;
+        else if (slowMax > slowTrv) slowMax = slowTrv;
+        float slowZoneEnd = (float) (dead + slowTrv);
+        float slowMaximum = (float) slowMax;
+
+        // calculate slow mode output
+        if (magnitude <= slowZoneEnd){
+            float scalingFactor = slowMaximum / magnitude;
+            *x = (uint8_t) ((scalingFactor * analogX) + 127.0f);
+            *y = (uint8_t) ((scalingFactor * analogY) + 127.0f);
+            return;
+        }
+    }
+    
+    // [step 5] outer deadzone (convert output to 8-way) for deadzoneAnalogs()
+
+    float deadZoneOuter = (float) deadOuter;
+
+    // if outer daedzone = on
     if (deadOuter != 127){
+        // convert output to 8-way
         if (magnitude >= deadZoneOuter){
+            // 127 +/- 49 = 176 & 78, 127*sin(22.5deg) almost = 49
             if (*x >= 176) *x = 255;
             else if (*x <= 78) *x = 0;
             else *x = 127;
             if (*y >= 176) *y = 255;
             else if (*y <= 78) *y = 0;
             else *y = 127;
+            return;
         }
     }
-    // By playing with inner and outer deadzone value, this will make analog into 8-way digital with customizable actuation point
-    // Diagonal directions (NE/SE/NW/SW) are only triggered when both x and y over +/- 49 
-    // Example 1: Inner Deadzone = 100 ; Outer Deadzone = 101
-    // >> Stick is now pure 8-way digital with actuation point at magnitude 101
-    // Example 2: Inner Deadzone = 10 ; Outer Deadzone = 150
-    // >> Stick working as analog with deadzone 10, with stick reach magnitude 150, stick change into 8-way digital
-
+    // return, no change made (current input not within inner dz, outer dz, and slow mode's range)
+    return;
 }
 
 void patchData(uint8_t *data) {
-    patchFuncLeft(&data[12], &data[13], deadzoneLeft, deadzoneOuterLeft);
-    patchFuncRight(&data[14], &data[15], deadzoneRight, deadzoneOuterRight);
+    patchFuncLeft(&data[12], &data[13], deadzoneLeft, deadzoneOuterLeft, slowTravelLeft, slowMaxLeft);
+    patchFuncRight(&data[14], &data[15], deadzoneRight, deadzoneOuterRight, slowTravelRight, slowMaxRight);
 }
 
 void loadConfig(void) {
 
-    // (No longer needed since moved config to ur0:/tai)
-    // Just in case the folder doesn't exist
-    // ksceIoMkdir("ux0:data/AnalogsEnhancer", 0777);
-
-    // Loading generic config file
-    // (Now using ur0:/tai/AnalogsEnhancerKai.txt as config file)
-    // SceUID fd = ksceIoOpen("ux0:/data/AnalogsEnhancer/config.txt", SCE_O_RDONLY, 0777);
-    SceUID fd = ksceIoOpen("ur0:/tai/AnalogsEnhancerKai.txt", SCE_O_RDONLY, 0777);
+    // load config file AnaEnKaiCfg.txt from ur0:tai
+    SceUID fd = ksceIoOpen("ur0:/tai/AnaEnKaiCfg.txt", SCE_O_RDONLY, 0777);
     if (fd >= 0){
-        ksceIoRead(fd, buffer, 32);
+        ksceIoRead(fd, buffer, 64);
         ksceIoClose(fd);
-    // (Now if no config file present, everything disabled by default, including wide patch, stick works like normal)
-    }else sprintf(buffer, "left=0,127,n;right=0,127,n;n");
-    sscanf(buffer, "left=%lu,%lu,%c;right=%lu,%lu,%c;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &widePatch);
+    }else {
+        // no config in ur0:tai, check config.txt from ux0:data/AnalogsEnhancerKai
+        // in case folder doesn't exist
+        ksceIoMkdir("ux0:data/AnalogsEnhancerKai", 0777);
+        fd = ksceIoOpen("ux0:/data/AnalogsEnhancerKai/config.txt", SCE_O_RDONLY, 0777);
+        if (fd >= 0){
+            ksceIoRead(fd, buffer, 64);
+            ksceIoClose(fd);
+        }else sprintf(buffer, "l=0,127,n,s=0,0;r=0,127,n,s=0,0;n");
+        // if no config file present, use default, everything off
+    }
+    sscanf(buffer, "l=%lu,%lu,%c,s=%lu,%lu;r=%lu,%lu,%c,s=%lu,%lu;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &slowTravelLeft, &slowMaxLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &slowTravelRight, &slowMaxRight, &widePatch);
+
+    // config explained
+    // l=0,127,n,s=0,0;r=0,127,n,s=0,0;n {
+    //     l={ left inner dz boundary (0 , 1 ~ 126 , 127) }, { left outer dz boundary (0 , 1 ~ 126 , 127) }, { use left rescaling (y/n) }
+    //     ,
+    //     s={ left slow mode boundary (0, 5 ~ "50% non-dz range") }, { left slow mode max output (0, 5 ~ "left slow mode boundary") }
+    //     ;
+    //     r={ right inner dz boundary (0 , 1 ~ 126 , 127) }, { right outer dz boundary (0 , 1 ~ 126 , 127) }, { use right rescaling (y/n) }
+    //     ,
+    //     s={ right slow mode boundary (0, 5 ~ "50% non-dz range") }, { right slow mode max output (0, 5 ~ "right slow mode boundary") }
+    //     ;
+    //     { use ANALOG_WIDE mode (y/n) }
+    // }
+    // {
+    //     inner dz boundary = 0 >> inner dz OFF ; > 126 >> always centre (x=127,y=127)
+    //     outer dz boundary = 0 or = 127 >> outer dz OFF
+    //     use rescaling >> y = yes, n = no
+    //     slow mode boundary = 0 >> slow mode OFF ; inner dz OFF && outer dz OFF >> slow mode OFF ; "50% of non-dz range" less than 5 >> slow mode OFF
+    //     slow mode max output >> when slow mode ON && slow mode max output value out of range, will auto correct to legit min or max
+    //     use ANALOG_WIDE mode >> y = yes, n = no
+    // }
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
     else patchFuncLeft = deadzoneAnalogs;
     if (rescaleRight == 'y') patchFuncRight = rescaleAnalogs;
     else patchFuncRight = deadzoneAnalogs;
     if (widePatch == 'y') apply_wide_patch = 1;
-
 }
 
 // Simplified generic hooking functions
