@@ -73,7 +73,7 @@ The code is based on u/lizin5ths's implementation (fork [Haasman0 / AnalogsEnhan
 
 Outer Dead Zone with **Rescaling Off** however, is something a little different. More on that below.  
 
-#### 3.1) Outer Dead Zone - Rescaling On (360 Degree Movement)
+#### 3.1) Outer Dead Zone - Rescaling On (360-Degree Movement)
 
 ``l=0,80,y,s=0,0;r=0,80,y,s=0,0;n``  
 In this example, the stick reaches the max much earlier.  
@@ -98,7 +98,7 @@ Right, but we could **use Inner & Outer Dead Zone together**.
 ``l=80,80,n,s=0,0;r=80,80,n,s=0,0;n``  
 
 Note the **8-Way always has an "Axial Dead Zone" of magnitude 49**.  
-So by setting "Inner Dead Zone = Outer Dead Zone", we could have an **8-Way joystick with customisable actuation point (49 to Max-1)**  
+So by setting "Inner Dead Zone = Outer Dead Zone", we could have an **8-Way joystick with customisable actuation point (49 to 126)**  
 
 ![l=80,80,n,s=0,0;r=80,80,n,s=0,0;n](https://github.com/user-attachments/assets/c85f6bd1-60c4-43d3-bbcd-b180e1ffa961)  
 
@@ -152,8 +152,8 @@ That last **"n"** in ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n``
 Also a classic feature from the original Rinnegatamante/AnalogsEnhancer.  
 
 Please allow me to quote from [Rinnegatamante](https://github.com/Rinnegatamante)
-> ANALOG_WIDE is one of the two modalities to poll analogs from Vita OS (one being ANALOG that simulates PSP polling and ANALOG_WIDE).  
-> In ANALOG mode (used even in several commercial games as well as PSP and PSX titles), max range of analogs is reduced thus making analogs feel less reactive.
+> "ANALOG_WIDE is one of the two modalities to poll analogs from Vita OS (one being ANALOG that simulates PSP polling and ANALOG_WIDE)."  
+> "In ANALOG mode (used even in several commercial games as well as PSP and PSX titles), max range of analogs is reduced thus making analogs feel less reactive."  
 
 It's a very nice feature but might ["causes issues in some games"](https://github.com/Rinnegatamante/AnalogsEnhancer/issues/2).  
 So it's disabled by default in AnalogsEnhancerKai.  
@@ -197,11 +197,11 @@ For each non-"y/n" config:
 | -------------------- | ---------------------- | ------------------------------------------------------------- |
 | Slow Mode Range      | 5 ~ "50% Non-DZ range" | **0** : Slow Mode **OFF**                                     |
 |                      |                        | "**50% Non-DZ range**" means **0.5 * (Outer DZ - Inner DZ)**  |
-|                      |                        | **Autocorrect to Legit Range**                                |
-|                      |                        | If **both Inner DZ & Outer DZ** = **OFF**, **Slow Mode OFF**  |
-|                      |                        | If **0.5 * (Outer DZ - Inner DZ)** < **5**, **Slow Mode OFF** |
+|                      |                        | **Autocorrect to Legit Min/Max**                              |
+|                      |                        | if **both Inner DZ & Outer DZ** = **OFF**, **Slow Mode OFF**  |
+|                      |                        | if **0.5 * (Outer DZ - Inner DZ)** < **5**, **Slow Mode OFF** |
 | -------------------- | ---------------------- | ------------------------------------------------------------- |
-| Slow Mode Max Output | 5 ~ "Slow Mode Range"  | **Autocorrect to Legit Range**                                |
+| Slow Mode Max Output | 5 ~ "Slow Mode Range"  | **Autocorrect to Legit Min/Max**                              |
 
 Eagle-eyed readers might spot in **4.1) Slow Mode - Rescaling On**  
 ``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n``  
@@ -225,6 +225,6 @@ See the LICENSE.md file for details.
 ## Acknowledgements
 
 * [Rinnegatamante](https://github.com/Rinnegatamante), for the original plugin
-* [yakit4k0](https://github.com/yakit4k0), for compiling, testing, and helping to implement Outer Dead Zone & Slow Mode
+* [yakit4k0](https://github.com/yakit4k0), for compiling, testing, making README images, and helping to implement Outer Dead Zone & Slow Mode
 * u/lizin5ths, for the idea of Outer Dead Zone (fork [Haasman0/AnalogsEnhancer](https://github.com/Haasman0/AnalogsEnhancer))
 * [HENkaku 変革](https://henkaku.xyz/) / [Vita SDK](https://vitasdk.org/) Community
