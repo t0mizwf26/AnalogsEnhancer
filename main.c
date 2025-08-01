@@ -63,11 +63,11 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
 
     // check if slow mode config is legit
     // doesn't meet minimum requirement (non-dz range < 10), mode unavailable, force slow mode = off
-    if ((deadOuter-dead) < 10) slowTrv = 0;
+    if ((deadOuter - dead) < 10) slowTrv = 0;
     // slow mode = on, but lower than min range (5), auto correct to min
     else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
     // slow mode = on, but higher than max range (50% of non-dz range), auto correct to max
-    else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
+    else if (slowTrv > (deadOuter - dead) / 2) slowTrv = (deadOuter - dead) / 2;
 
     float slowZoneEnd = (float) (dead + slowTrv);
     float slowMaximum = 0.0f;
@@ -196,11 +196,11 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
 
     // check if slow mode config is legit
     // doesn't meet minimum requirement (non-dz range < 10), mode unavailable, force slow mode = off
-    if ((deadOuter-dead) < 10) slowTrv = 0;
+    if ((deadOuter - dead) < 10) slowTrv = 0;
     // slow mode = on, but lower than min range (5), auto correct to min
     else if (slowTrv != 0 && slowTrv < 5) slowTrv = 5;
     // slow mode = on, but higher than max range (50% of non-dz range), auto correct to max
-    else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
+    else if (slowTrv > (deadOuter - dead) / 2) slowTrv = (deadOuter - dead) / 2;
 
     // slow mode for deadzoneAnalogs(), always output magnitude slow mode max
     if (slowTrv != 0){
@@ -213,10 +213,8 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
         // calculate slow mode output
         if (magnitude <= slowZoneEnd){
             float scalingFactor = slowMaximum / magnitude;
-            analogX = (analogX * scalingFactor);
-            analogY = (analogY * scalingFactor);
-            *x = (uint8_t) (analogX) + 127.0f;
-            *y = (uint8_t) (analogY) + 127.0f;
+            *x = (uint8_t) ((scalingFactor * analogX) + 127.0f);
+            *y = (uint8_t) ((scalingFactor * analogY) + 127.0f);
             return;
         }
     }
