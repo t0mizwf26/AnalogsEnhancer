@@ -268,18 +268,18 @@ void loadConfig(void) {
 
     // config explained
     // l=0,127,n,s=0,0;r=0,127,n,s=0,0;n {
-    //     l={ left inner dz boundary (0 ~ 126) }, { left outer dz boundary (0 ~ 127) }, { use left rescaling (y/n) }
+    //     l={ left inner dz boundary (0 , 1 ~ 126 , 127) }, { left outer dz boundary (0 , 1 ~ 126 , 127) }, { use left rescaling (y/n) }
     //     ,
-    //     s={ left slow mode boundary (0, 5 ~ "50% of non-dz range") }, { left slow mode max output (0, 5 ~ "left slow mode boundary") }
+    //     s={ left slow mode boundary (0, 5 ~ "50% non-dz range") }, { left slow mode max output (0, 5 ~ "left slow mode boundary") }
     //     ;
-    //     r={ right inner dz boundary (0 ~ 126) }, { right outer dz boundary (0 ~ 127) }, { use right rescaling (y/n) }
+    //     r={ right inner dz boundary (0 , 1 ~ 126 , 127) }, { right outer dz boundary (0 , 1 ~ 126 , 127) }, { use right rescaling (y/n) }
     //     ,
     //     s={ right slow mode boundary (0, 5 ~ "50% non-dz range") }, { right slow mode max output (0, 5 ~ "right slow mode boundary") }
     //     ;
     //     { use ANALOG_WIDE mode (y/n) }
     // }
     // {
-    //     inner dz boundary = 0 >> inner dz OFF ; = 126 >> always centre (x=127,y=127)
+    //     inner dz boundary = 0 >> inner dz OFF ; > 126 >> always centre (x=127,y=127)
     //     outer dz boundary = 0 or = 127 >> outer dz OFF
     //     use rescaling >> y = yes, n = no
     //     slow mode boundary = 0 >> slow mode OFF ; inner dz OFF && outer dz OFF >> slow mode OFF ; "50% of non-dz range" less than 5 >> slow mode OFF
