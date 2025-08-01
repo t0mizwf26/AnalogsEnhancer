@@ -12,7 +12,7 @@ static SceUID hooks[HOOKS_NUM];
 static tai_hook_ref_t refs[HOOKS_NUM];
 
 static uint32_t deadzoneLeft, deadzoneOuterLeft, slowTravelLeft, slowMaxLeft, deadzoneRight, deadzoneOuterRight, slowTravelRight, slowMaxRight;
-static char buffer[32];
+static char buffer[64];
 static char rescaleLeft, rescaleRight, widePatch;
 static uint8_t apply_wide_patch = 0;
 
@@ -69,7 +69,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     // slow mode = on, but higher than max range (50% of non-dz range), auto correct to max
     else if (slowTrv > (deadOuter-dead)/2) slowTrv = (deadOuter-dead)/2;
 
-    float slowZoneEnd = float (dead + slowTrv);
+    float slowZoneEnd = (float) (dead + slowTrv);
     float slowMaximum = 0.0f;
 
     float absAnalogX = fabs(analogX);
@@ -253,7 +253,7 @@ void loadConfig(void) {
     // load config file AnaEnKaiCfg.txt from ur0:tai
     SceUID fd = ksceIoOpen("ur0:/tai/AnaEnKaiCfg.txt", SCE_O_RDONLY, 0777);
     if (fd >= 0){
-        ksceIoRead(fd, buffer, 32);
+        ksceIoRead(fd, buffer, 64);
         ksceIoClose(fd);
     }else {
         // no config in ur0:tai, check config.txt from ux0:data/AnalogsEnhancerKai
@@ -261,7 +261,7 @@ void loadConfig(void) {
         ksceIoMkdir("ux0:data/AnalogsEnhancerKai", 0777);
         fd = ksceIoOpen("ux0:/data/AnalogsEnhancerKai/config.txt", SCE_O_RDONLY, 0777);
         if (fd >= 0){
-            ksceIoRead(fd, buffer, 32);
+            ksceIoRead(fd, buffer, 64);
             ksceIoClose(fd);
         }else sprintf(buffer, "l=0,127,n,s=0,0;r=0,127,n,s=0,0;n");
         // if no config file present, use default, everything off
