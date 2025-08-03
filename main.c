@@ -122,8 +122,8 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         if (diagScale < 0) diagScale = 0;
         else if (diagScale > 42) diagScale = 42;
 
-        // convert config (0 ~ 42) to (142 ~ 100)
-        // 142 means diagonal scaling off (1.42000f > sqrt(2))
+        // convert user friendly config (0 ~ 42) to actual value (142 ~ 100)
+        // 142 (i.e. 0) means diagonal scaling off (1.42000f > sqrt(2))
         diagScale = (-1) * (diagScale - 142);
 
         if (absAnalogX > absAnalogY)
@@ -285,7 +285,7 @@ void loadConfig(void) {
 
     // config explained
     //
-    // l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125 {
+    // l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0 {
     //     l={ left inner dz boundary (0 , 1 ~ 126 , 127) }, { left outer dz boundary (0 , 1 ~ 126 , 127) }, { use left rescaling (y/n) }
     //     ,
     //     s={ left slow mode boundary (0, 5 ~ "50% non-dz range") }, { left slow mode max output (0, 5 ~ "left slow mode boundary") }
