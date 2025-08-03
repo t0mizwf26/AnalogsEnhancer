@@ -33,21 +33,21 @@ ur0:tai/AnalogsEnhancerKai.skprx
 > **!! IMPORTANT NOTE: PLEASE READ !!**
 >  
 > All the **"Dead Zone"** and **"Slow Mode"** example graphs below were created for v1.1.0.  
-> So you will find v1.2.0's new **"Diagonal Scaling Limiter (DSL)"** config, or ``d=125``, missing.  
-> However, **"DSL"** config will not affect any of the examples. They are **NOT** outdated and still usable.  
+> So you will find v1.2.0's new **"Diagonal Scaling (DS)"** config, or ``d=0``, missing.  
+> However, **"DS"** config will not affect any of the examples. They are **NOT** outdated and still usable.  
 > (Descriptions are updated)  
-> Just remember, in real v1.2.0 config file, there's now ``d=SOMETHING`` at the end of the config.  
-> **"DSL"** feature is explained after **"5) ANALOG_WIDE"**.  
+> Just remember, in real v1.2.0 config file, there's now ``d=0`` at the end of the config.  
+> **"Diagonal Scaling"** is explained after **"5) ANALOG_WIDE"**.  
 >  
 > Thanks, please read on.  
 
 ### 1) Introduction
 
 If .txt config file is missing, the following default config will be used instead.  
-``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125``  
+``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0``  
 Which means every feature offered by this plugin is turned **OFF**.  
 
-![l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125](https://github.com/user-attachments/assets/8b9586f9-aa5f-4e8d-8bf8-9fd243acee22)  
+![l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/8b9586f9-aa5f-4e8d-8bf8-9fd243acee22)  
 
 ### 2) Inner Dead Zone
 
@@ -56,15 +56,15 @@ With 2 different modes to choose from: **Rescaling On** & **Rescaling Off**.
 
 #### 2.1) Inner Dead Zone - Rescaling On (Scaled Radial Dead Zone)
 
-``l=64,127,y,s=0,0;r=64,127,y,s=0,0;n;d=125``  
+``l=64,127,y,s=0,0;r=64,127,y,s=0,0;n;d=0``  
 This is probably the most common Dead Zone people would use to fix drifting analogue sticks.  
 The full range is available, no input is ignored (skipped), allowing low-magnitude adjustments.  
 
-![l=64,127,y,s=0,0;r=64,127,y,s=0,0;n;d=125](https://github.com/user-attachments/assets/948025db-147b-44b8-a299-be4e982d5ee9)  
+![l=64,127,y,s=0,0;r=64,127,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/948025db-147b-44b8-a299-be4e982d5ee9)  
 
 #### 2.2) Inner Dead Zone - Rescaling Off (Radial Dead Zone)
 
-``l=16,127,n,s=0,0;r=16,127,n,s=0,0;n;d=125``  
+``l=16,127,n,s=0,0;r=16,127,n,s=0,0;n;d=0``  
 Fewer people would choose to use this. Less ideal, some input is ignored (skipped).  
 
 In this example, low-magnitude adjustments with magnitude < 16 are impossible.  
@@ -72,7 +72,7 @@ There's one advantage, though. Notice the gradient here is still **1**?
 Unlike the previous **Rescaling On** example with gradient **2**.  
 This means it's a little easier to make precise adjustments for the remaining range (16 to Max).  
 
-![l=16,127,n,s=0,0;r=16,127,n,s=0,0;n;d=125](https://github.com/user-attachments/assets/0cfbe53d-af94-4abb-be30-54aeea9d497f)  
+![l=16,127,n,s=0,0;r=16,127,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/0cfbe53d-af94-4abb-be30-54aeea9d497f)  
 
 ### 3) Outer Dead Zone
 
@@ -87,39 +87,39 @@ Outer Dead Zone with **Rescaling Off** however, is something a little different.
 
 #### 3.1) Outer Dead Zone - Rescaling On (360-Degree Movement)
 
-``l=0,80,y,s=0,0;r=0,80,y,s=0,0;n;d=125``  
+``l=0,80,y,s=0,0;r=0,80,y,s=0,0;n;d=0``  
 In this example, the stick reaches the max much earlier.  
 Bring more _cute cat paw claw grip cap cover_!!.  
 
-![l=0,80,y,s=0,0;r=0,80,y,s=0,0;n;d=125](https://github.com/user-attachments/assets/134a7a74-48e5-4358-a695-c4c5db7b43ae)  
+![l=0,80,y,s=0,0;r=0,80,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/134a7a74-48e5-4358-a695-c4c5db7b43ae)  
 
 #### 3.2) Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")
 
-``l=0,80,n,s=0,0;r=0,80,n,s=0,0;n;d=125``  
+``l=0,80,n,s=0,0;r=0,80,n,s=0,0;n;d=0``  
 The _little joystick covers_ problem is solved by using **Rescaling On**.  
 Q: What should **Rescaling Off** do? A: **Go retro.**  
 Now here's something niche.  
 
-![l=0,80,n,s=0,0;r=0,80,n,s=0,0;n;d=125](https://github.com/user-attachments/assets/5120397e-85de-4eb6-a417-5c4ded417ec3)  
+![l=0,80,n,s=0,0;r=0,80,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/5120397e-85de-4eb6-a417-5c4ded417ec3)  
 
 #### 3.3) Whoa, hang on a second!
 
 Why should people use a normal 360-degree analogue stick with only the outer one-third as 8-Way?  
 Right, but we could **use Inner & Outer Dead Zone together**.  
 
-``l=80,80,n,s=0,0;r=80,80,n,s=0,0;n;d=125``  
+``l=80,80,n,s=0,0;r=80,80,n,s=0,0;n;d=0``  
 
 Note the **8-Way always has an "Axial Dead Zone" of magnitude 49**.  
 So by setting "Inner Dead Zone = Outer Dead Zone", we could have an **8-Way joystick with customisable actuation point (49 to 126)**  
 
-![l=80,80,n,s=0,0;r=80,80,n,s=0,0;n;d=125](https://github.com/user-attachments/assets/c85f6bd1-60c4-43d3-bbcd-b180e1ffa961)  
+![l=80,80,n,s=0,0;r=80,80,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/c85f6bd1-60c4-43d3-bbcd-b180e1ffa961)  
 
-``l=80,80,y,s=0,0;r=80,80,y,s=0,0;n;d=125``  
+``l=80,80,y,s=0,0;r=80,80,y,s=0,0;n;d=0``  
 
 You probably guessed we could do the same with **Rescaling On**, 360-Degree Movement with Max output only.  
 However, personally, I can't think of a reason to.  
 
-![l=80,80,y,s=0,0;r=80,80,y,s=0,0;n;d=125](https://github.com/user-attachments/assets/b64aa177-72c8-4944-a29b-a2ba45fb4416)  
+![l=80,80,y,s=0,0;r=80,80,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/b64aa177-72c8-4944-a29b-a2ba45fb4416)  
 
 ### 4) S for Sniper? Snail? Shooter? ...Well, it's "Slow Mode"
 
@@ -127,39 +127,39 @@ Very boring name I know. Just call it Sniper / Snail / Shooter / High-Precision 
 I'm just way too lazy to change all related names in the code, so I will keep calling it: "Slow Mode".  
 
 Remember earlier example in **2.1) Inner Dead Zone - Rescaling On (Scaled Radial Dead Zone)**?  
-``l=64,127,y,s=0,0;r=64,127,y,s=0,0;n;d=125``  
+``l=64,127,y,s=0,0;r=64,127,y,s=0,0;n;d=0``  
 Inner 50% = Dead Zone, gradient is "2" instead of the normal "1". Everything's so fast, it's hard to make tiny adjustments!  
 Let's try to fix this, but unfortunately with a price to pay.  
 
 #### 4.1) Slow Mode - Rescaling On
 
-``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=125``  
+``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=0``  
 Change ``s=0,0`` to ``s=32,16``, here's the result:  
 
-![l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=125](https://github.com/user-attachments/assets/53e0a449-f811-4cd3-9749-222e0a274379)  
+![l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=0](https://github.com/user-attachments/assets/53e0a449-f811-4cd3-9749-222e0a274379)  
 
 Now it's easier to sneak / snipe.  
 However, the outer half is sacrificed. Gradient is increased, making the outer half even harder to do tiny adjustments.  
 
 #### 4.2) Slow Mode - Rescaling Off
 
-``l=16,127,n,s=32,16;r=16,127,n,s=32,16;n;d=125``  
+``l=16,127,n,s=32,16;r=16,127,n,s=32,16;n;d=0``  
 Also change ``s=0,0`` to ``s=32,16``, see what happens here when **Rescaling Off**:  
 
-![l=16,127,n,s=32,16;r=16,127,n,s=32,16;n;d=125](https://github.com/user-attachments/assets/942dbd2c-86f8-42fd-8389-0b63ff16f261)  
+![l=16,127,n,s=32,16;r=16,127,n,s=32,16;n;d=0](https://github.com/user-attachments/assets/942dbd2c-86f8-42fd-8389-0b63ff16f261)  
 
 In this particular example, within Slow Mode range (32), the output magnitude will always be "16".  
 
 #### 4.3) Have some fun
 
-``l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=125``  
+``l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=0``  
 Who's going to do this?  
 
-![l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=125](https://github.com/user-attachments/assets/391ce4da-e428-46b5-be93-5e1bf828e5ab)  
+![l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=0](https://github.com/user-attachments/assets/391ce4da-e428-46b5-be93-5e1bf828e5ab)  
 
 ### 5) ANALOG_WIDE
 
-That last **"n"**, before **"d=125"** in ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125``  
+That last **"n"**, before **"d=0"** in ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0``  
 
 Also a classic feature from the original Rinnegatamante/AnalogsEnhancer.  
 
@@ -171,58 +171,55 @@ It's a very nice feature but might ["causes issues in some games"](https://githu
 So it's disabled by default in AnalogsEnhancerKai.  
 If needed, please re-enable it manually (by changing that last **n** into **y**).  
 
-### 6) Diagonal Scaling Limiter
+### 6) Diagonal Scaling
 
-The **"d=125"** from ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125``.  
+The **"d=0"** from ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0``.  
 
 In some software, the stick may have difficulty in reaching Max output in diagonal directions.  
-This DSL feature might be useful when trying to fix that.  
+This Diagonal Scaling feature might be useful when trying to fix that.  
 
-#### 6.1) How to configure DSL
+#### 6.1) How to configure Diagonal Scaling
 
-The **default and recommended value is 125** (means limited to 1.25x radius).  
-(Using **0** here also means **125**. Just in case you want to change it back to default, but you forget what the value is.)  
-
-The **Minimum** legit value is **100** (means 1.00x).  
-The **Maximum** is **142** (means 1.42x, or "just above square root of 2").  
+The **Minimum** is **0** (means 1.00x, Scaling Diagonal Scaling is Off).  
+The **Maximum** is **42** 
 (Anything out of the min. ~ max. range will get **autocorrected to Minimum or Maximum**.)  
 
-**Lowering** the value makes the stick reach its diagonal Max output earlier.  
+**Increasing** the value makes the stick reach its diagonal Max output earlier.  
 (For example, there are people reporting issues with PSP games using **Adrenaline**.)  
-
-**Increasing** the value could help when the stick is reaching Max on diagonal directions too early.   
 
 #### 6.2) Note
 
-> This feature **only works with "Rescaling On"**.
+> This feature **only works with "Rescaling On"**.  
 
 > You might have to edit this value often if you have many games having problems.  
-> For example, if you find **"d=100"** works best for **Adrenaline**, leaving it at 100 will cause other games to reach Max on diagonal directions too early.  
-> Since those games might work best with **"d=125"**.  
+> For example, if you find **"d=42"** works best for **Adrenaline**, leaving it at 42 will cause other games to reach Max on diagonal directions too early.  
+> Since those games might work best with **"d=0"**.  
 
 > There's no plan to implement "per-game profile" for AnalogsEnhancerKai.  
 
 > Using "**Outer Dead Zone - Rescaling On**" could achieve a very similar fix.  
 > However, it will compress/sacrifice useable range for non-diagonal directions.  
-> This "**DSP**" will not.  
+> This "**Diagonal Scaling**" will not.  
 
-#### 6.3) Some more details about DSL
+#### 6.3) Some more details about Diagonal Scaling
 
 The root cause of the problem is about "**stick circularity**".  
 PC gamers might know that "[**Gamepad Tester - Test Circularity (spin joysticks slowly to test)**](https://hardwaretester.com/gamepad)".  
 
 If trying to draw a circle using the stick's maximum tilt, software-wise speaking, it will not be a perfect circle.  
-Normally it's somewhere between a square and a circle, a square with rounded corners.  
+In most cases it's somewhere between a square and a circle, with rounded corners.  
 
-An extreme example would be "**Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")**".  
-If all 8 "dots" are connected, that's a square.  
+An extreme example would be "**Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")**", that's a square.  
+Normally the stick moves within the circle and should not reach those 4 corners.  
+``0,0 ; 0,255 ; 255,255 ; 255,0`` for PS Vita.  
 
-We need to have this "**circularity error**" in mind when doing "**Dead Zone with Rescaling On**", but some games might also be doing their own adjustments.  
-Thus, there might be problems when using "**Dead Zone with Rescaling On**" with those games.  
+We need to have this "**circularity**" in mind when doing "**Dead Zone with Rescaling On**".  
+However, if some games require values near those 4 corners to work properly, then there are problems.  
+By using **Outer Dead Zone - Rescaling On** or **Diagonal Scaling**, we are bringing those inaccessible corner areas into the circle, so the problem is fixed.  
 
 ## Understand & Customise Config File
 
-``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125``  
+``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0``  
 
 Break it into 4 sections:  
 
@@ -233,7 +230,7 @@ Break it into 4 sections:
 | ----------- | ---------------- |
 | ANALOG_WIDE | n;               |
 | ----------- | ---------------- |
-| DSL         | d=125            |
+| DS          | d=0              |
 
 Now, we could see **Left Stick** and **Right Stick** configs sharing the same structure:  
 ``l(/r)=0,127,n,s=0,0;``  
@@ -248,7 +245,7 @@ Each part means:
 | ------------ | ------------------------------------- |
 | n;           | **5) ANALOG_WIDE**, (y=ON ; n=OFF)    |
 | ------------ | ------------------------------------- |
-| d=125        | **6) Diagonal Scaling Limiter**       |
+| d=0          | **6) Diagonal Scaling**               |
 
 For each non-"y/n" config:  
 
@@ -268,20 +265,19 @@ For each non-"y/n" config:
 | -------------------- | ---------------------- | ------------------------------------------------------------- |
 | Slow Mode Max Output | 5 ~ "Slow Mode Range"  | **Autocorrect to Legit Min/Max**                              |
 | -------------------- | ---------------------- | ------------------------------------------------------------- |
-| DSL                  | 100 ~ 142              | **Default & Recommended value is 125**                        |
-|                      |                        | If you forget default is 125, use 0 instead, **0 = 125**      |
+| Diagonal Scaling     | 1 ~ 42                 | **0** : Diagonal Scaling **OFF**                              |
 |                      |                        | **Autocorrect to Legit Min/Max**                              |
 |                      |                        | Only works with "**Rescaling On**"                            |
 
 Eagle-eyed readers might spot in **4.1) Slow Mode - Rescaling On**  
-``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=125``  
+``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=0``  
 **32 > (127-64)/2**, ``s=32,16`` will get autocorrected to ``s=31,16``  
 
 ## Version History
 
 * 1.2.0 (2025-08-03 UTC)
-    * Add new **Diagonal Scaling Limiter (DSL)** feature for fixing inability to reach diagonal Max output in some games
-    * Config structure changed again for **DSL**, please update your config file to v1.2.0
+    * Add new **Diagonal Scaling (DS)** feature for fixing inability to reach diagonal Max output in some games
+    * Config structure changed again for **DS**, please update your config file to v1.2.0
 * 1.1.0 (2025-08-01 UTC)
     * Add new **Slow Mode** feature for better low-magnitude stick movement
     * Can use either **ur0:tai** or **ux0:data/AnalogsEnhancerKai** as config file folder
