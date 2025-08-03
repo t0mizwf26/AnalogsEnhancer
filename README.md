@@ -37,9 +37,9 @@ ur0:tai/AnalogsEnhancerKai.skprx
 > However, **"DSL"** config will not affect any of the examples. They are **NOT** outdated and still usable.  
 > (Descriptions are updated)  
 > Just remember, in real v1.2.0 config file, there's now ``d=SOMETHING`` at the end of the config.  
-> **"DSL"** feature is explained after **"5) ANALOG_WIDE"**.
+> **"DSL"** feature is explained after **"5) ANALOG_WIDE"**.  
 >  
-> Thanks, and please read on.  
+> Thanks, please read on.  
 
 ### 1) Introduction
 
@@ -155,7 +155,7 @@ In this particular example, within Slow Mode range (32), the output magnitude wi
 ``l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=125``  
 Who's going to do this?  
 
-![l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=125](https://github.com/user-attachments/assets/391ce4da-e428-46b5-be93-5e1bf828e5ab)
+![l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=125](https://github.com/user-attachments/assets/391ce4da-e428-46b5-be93-5e1bf828e5ab)  
 
 ### 5) ANALOG_WIDE
 
@@ -163,7 +163,7 @@ That last **"n"**, before **"d=125"** in ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=1
 
 Also a classic feature from the original Rinnegatamante/AnalogsEnhancer.  
 
-Please allow me to quote from [Rinnegatamante](https://github.com/Rinnegatamante)
+Please allow me to quote from [Rinnegatamante](https://github.com/Rinnegatamante)  
 > "ANALOG_WIDE is one of the two modalities to poll analogs from Vita OS (one being ANALOG that simulates PSP polling and ANALOG_WIDE)."  
 > "In ANALOG mode (used even in several commercial games as well as PSP and PSX titles), max range of analogs is reduced thus making analogs feel less reactive."  
 
@@ -173,40 +173,52 @@ If needed, please re-enable it manually (by changing that last **n** into **y**)
 
 ### 6) Diagonal Scaling Limiter
 
-That **"d=125"** from ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125``.  
-Maybe it's confusing, but this should be useful in certain situations.  
+The **"d=125"** from ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125``.  
 
-In some software, the stick may have difficulty in reaching MAX in diagonal directions.  
-Lowering the value should help by making the stick reach its diagonal MAX sooner.  
-(For example, there are people reporting issues with PSP games using **Adrenaline**.)  
+In some software, the stick may have difficulty in reaching Max output in diagonal directions.  
+This DSL feature might be useful when trying to fix that.  
 
-Or, if the stick is reaching MAX on diagonal directions too early, increasing this value might help.  
+#### 6.1) How to configure DSL
 
-The default and **recommended value is 125** (means 1.25x).  
+The **default and recommended value is 125** (means limited to 1.25x radius).  
 (Using **0** here also means **125**. Just in case you want to change it back to default, but you forget what the value is.)  
 
 The **Minimum** legit value is **100** (means 1.00x).  
 The **Maximum** is **142** (means 1.42x, or "just above square root of 2").  
 (Anything out of the min. ~ max. range will get **autocorrected to Minimum or Maximum**.)  
 
-> You might have to change this value often if you have many games having this problem.  
-> If you find **"d=100"** works best for **Adrenaline**, leaving it at 100 will cause other games to reach MAX on diagonal directions too early.  
-> Because those games might work best with **"d=125"**.  
+**Lowering** the value makes the stick reach its diagonal Max output earlier.  
+(For example, there are people reporting issues with PSP games using **Adrenaline**.)  
 
-> Sorry, but there's no plan to implement "per-game profile".  
+**Increasing** the value could help when the stick is reaching Max on diagonal directions too early.   
+
+#### 6.2) Note
+
+> This feature **only works with "Rescaling On"**.
+
+> You might have to edit this value often if you have many games having problems.  
+> For example, if you find **"d=100"** works best for **Adrenaline**, leaving it at 100 will cause other games to reach Max on diagonal directions too early.  
+> Since those games might work best with **"d=125"**.  
+
+> There's no plan to implement "per-game profile" for AnalogsEnhancerKai.  
 
 > Using "**Outer Dead Zone - Rescaling On**" could achieve a very similar fix.  
-> However, it will compress/sacrifice useable range for non-diagonal directions. This "DSP" will not.  
+> However, it will compress/sacrifice useable range for non-diagonal directions.  
+> This "**DSP**" will not.  
 
-The root cause of the problem is about "**circularity**".  
+#### 6.3) Some more details about DSL
+
+The root cause of the problem is about "**stick circularity**".  
 PC gamers might know that "[**Gamepad Tester - Test Circularity (spin joysticks slowly to test)**](https://hardwaretester.com/gamepad)".  
 
-If you draw a circle using the stick's maximum tilt, software-wise speaking, it is not a perfect circle.  
+If trying to draw a circle using the stick's maximum tilt, software-wise speaking, it will not be a perfect circle.  
 Normally it's somewhere between a square and a circle, a square with rounded corners.  
-An extreme example would be "**Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")**", that's a square.  
 
-We have this in mind when doing rescaling, but the game/software might also be doing its own thing to make the square more like a circle.  
-When rescaling meets those games, then we have the problem.  
+An extreme example would be "**Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")**".  
+If all 8 "dots" are connected, that's a square.  
+
+We need to have this "**circularity error**" in mind when doing "**Dead Zone with Rescaling On**", but some games might also be doing their own adjustments.  
+There might be problems when using "**Dead Zone with Rescaling On**" with those games.  
 
 ## Understand & Customise Config File
 
@@ -259,6 +271,7 @@ For each non-"y/n" config:
 | DSL                  | 100 ~ 142              | **Default & Recommended value is 125**                        |
 |                      |                        | If you forget default is 125, use 0 instead, **0 = 125**      |
 |                      |                        | **Autocorrect to Legit Min/Max**                              |
+|                      |                        | Only works with "**Rescaling On**"                            |
 
 Eagle-eyed readers might spot in **4.1) Slow Mode - Rescaling On**  
 ``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=125``  
@@ -267,10 +280,8 @@ Eagle-eyed readers might spot in **4.1) Slow Mode - Rescaling On**
 ## Version History
 
 * 1.2.0 (2025-08-03 UTC)
-    * Add new **Diagonal Scaling Limiter (DSL)** feature to fix the inability to reach MAX output in some games
-    * **Use DSL with caution**, it **WON'T** damage anything but might cause strange stick behaviour if you don't understand what it does
-    * In other words, **DO NOT touch that "d=125" if you don't need it**
-    * Config structure changed again for **DSL**, so please replace/update your config file to v1.2.0
+    * Add new **Diagonal Scaling Limiter (DSL)** feature to fix the inability to reach diagonal Max output in some games
+    * Config structure changed again for **DSL**, please update your config file to v1.2.0
 * 1.1.0 (2025-08-01 UTC)
     * Add new **Slow Mode** feature for better low-magnitude stick movement
     * Can use either **ur0:tai** or **ux0:data/AnalogsEnhancerKai** as config file folder
@@ -287,6 +298,6 @@ See the LICENSE.md file for details.
 ## Acknowledgements
 
 * [Rinnegatamante](https://github.com/Rinnegatamante), for the original plugin
-* [yakit4k0](https://github.com/yakit4k0), for compiling, testing, making README images, and helping to implement Outer Dead Zone & Slow Mode
+* [yakit4k0](https://github.com/yakit4k0), for compiling, testing, making README images, and co-developing new features
 * u/lizin5ths, for the idea of Outer Dead Zone (fork [Haasman0/AnalogsEnhancer](https://github.com/Haasman0/AnalogsEnhancer))
 * [HENkaku 変革](https://henkaku.xyz/) / [Vita SDK](https://vitasdk.org/) Community
