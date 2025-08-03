@@ -280,7 +280,7 @@ Eagle-eyed readers might spot in **4.1) Slow Mode - Rescaling On**
 ## Version History
 
 * 1.2.0 (2025-08-03 UTC)
-    * Add new **Diagonal Scaling Limiter (DSL)** feature to fix the inability to reach diagonal Max output in some games
+    * Add new **Diagonal Scaling Limiter (DSL)** feature for fixing inability to reach diagonal Max output in some games
     * Config structure changed again for **DSL**, please update your config file to v1.2.0
 * 1.1.0 (2025-08-01 UTC)
     * Add new **Slow Mode** feature for better low-magnitude stick movement
