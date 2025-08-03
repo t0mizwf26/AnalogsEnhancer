@@ -218,7 +218,7 @@ An extreme example would be "**Outer Dead Zone - Rescaling Off (8-Way, "Axial De
 If all 8 "dots" are connected, that's a square.  
 
 We need to have this "**circularity error**" in mind when doing "**Dead Zone with Rescaling On**", but some games might also be doing their own adjustments.  
-There might be problems when using "**Dead Zone with Rescaling On**" with those games.  
+Thus, there might be problems when using "**Dead Zone with Rescaling On**" with those games.  
 
 ## Understand & Customise Config File
 
