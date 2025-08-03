@@ -11,17 +11,17 @@ static uint8_t current_hook = 0;
 static SceUID hooks[HOOKS_NUM];
 static tai_hook_ref_t refs[HOOKS_NUM];
 
-static uint32_t deadzoneLeft, deadzoneOuterLeft, slowTravelLeft, slowMaxLeft, deadzoneRight, deadzoneOuterRight, slowTravelRight, slowMaxRight;
+static uint32_t deadzoneLeft, deadzoneOuterLeft, slowTravelLeft, slowMaxLeft, deadzoneRight, deadzoneOuterRight, slowTravelRight, slowMaxRight, diagonalLimiter;
 static char buffer[64];
 static char rescaleLeft, rescaleRight, widePatch;
 static uint8_t apply_wide_patch = 0;
 
-static void (*patchFuncLeft)(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax);
-static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax);
+static void (*patchFuncLeft)(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax, int dLimiter);
+static void (*patchFuncRight)(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax, int dLimiter);
 
 // Courtesy of rsn8887
 // Thanks u/lizin5ths for outer deadzone idea
-void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax) {
+void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax, int dLimiter) {
     //radial and scaled deadzone
     //http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
     //input and output values go from 0...255;
@@ -117,12 +117,21 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     if (magnitude > slowZoneEnd){
         //adjust maximum magnitude
         float maximum;
+
+        // check and setup "diagonal scaling limiter" value for "maximum magnitude" and "scaled axis values" calculation
+        // 100 ~ 141 means limit "maximum magnitude" value to (1.00x ~ 1.41x) of 127.0
+        // 142 means limiter off, sqrt(2) > 1.41000f
+        if (dLimiter == 0) dLimiter = 125;
+        else if (dLimiter < 100) dLimiter = 100;
+        else if (dLimiter > 142) dLimiter = 142;
+        float maxLimiter = (float) dLimiter * 1.27f;
+
         if (absAnalogX > absAnalogY)
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogY) / absAnalogX) * ((127.0f * analogY) / absAnalogX));
         else
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogX) / absAnalogY) * ((127.0f * analogX) / absAnalogY));
 
-        if (maximum > 1.25f * 127.0f) maximum = 1.25f * 127.0f;
+        if (dLimiter < 142 && maximum > maxLimiter) maximum = maxLimiter;
         if (maximum < magnitude) maximum = magnitude;
 
         // find scaled axis values with magnitudes between slow mode boundary and maximum
@@ -158,7 +167,8 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     // return;
 }
 
-void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax) {
+void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax, int dLimiter) {
+    // dLimiter currently unused in deadzoneAnalogs()
 
     // [step 1] deadzone covers the entire range, always centre
 
@@ -242,8 +252,8 @@ void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTr
 }
 
 void patchData(uint8_t *data) {
-    patchFuncLeft(&data[12], &data[13], deadzoneLeft, deadzoneOuterLeft, slowTravelLeft, slowMaxLeft);
-    patchFuncRight(&data[14], &data[15], deadzoneRight, deadzoneOuterRight, slowTravelRight, slowMaxRight);
+    patchFuncLeft(&data[12], &data[13], deadzoneLeft, deadzoneOuterLeft, slowTravelLeft, slowMaxLeft, diagonalLimiter);
+    patchFuncRight(&data[14], &data[15], deadzoneRight, deadzoneOuterRight, slowTravelRight, slowMaxRight, diagonalLimiter);
 }
 
 void loadConfig(void) {
@@ -261,13 +271,13 @@ void loadConfig(void) {
         if (fd >= 0){
             ksceIoRead(fd, buffer, 64);
             ksceIoClose(fd);
-        }else sprintf(buffer, "l=0,127,n,s=0,0;r=0,127,n,s=0,0;n");
+        }else sprintf(buffer, "l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125");
         // if no config file present, use default, everything off
     }
-    sscanf(buffer, "l=%lu,%lu,%c,s=%lu,%lu;r=%lu,%lu,%c,s=%lu,%lu;%c", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &slowTravelLeft, &slowMaxLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &slowTravelRight, &slowMaxRight, &widePatch);
+    sscanf(buffer, "l=%lu,%lu,%c,s=%lu,%lu;r=%lu,%lu,%c,s=%lu,%lu;%c;d=%lu", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &slowTravelLeft, &slowMaxLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &slowTravelRight, &slowMaxRight, &widePatch, &diagonalLimiter);
 
     // config explained
-    // l=0,127,n,s=0,0;r=0,127,n,s=0,0;n {
+    // l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125 {
     //     l={ left inner dz boundary (0 , 1 ~ 126 , 127) }, { left outer dz boundary (0 , 1 ~ 126 , 127) }, { use left rescaling (y/n) }
     //     ,
     //     s={ left slow mode boundary (0, 5 ~ "50% non-dz range") }, { left slow mode max output (0, 5 ~ "left slow mode boundary") }
@@ -277,6 +287,8 @@ void loadConfig(void) {
     //     s={ right slow mode boundary (0, 5 ~ "50% non-dz range") }, { right slow mode max output (0, 5 ~ "right slow mode boundary") }
     //     ;
     //     { use ANALOG_WIDE mode (y/n) }
+    //     ;
+    //     d={ diagonal scaling limiter (100 ~ 142) }
     // }
     // {
     //     inner dz boundary = 0 >> inner dz OFF ; > 126 >> always centre (x=127,y=127)
@@ -285,6 +297,7 @@ void loadConfig(void) {
     //     slow mode boundary = 0 >> slow mode OFF ; inner dz OFF && outer dz OFF >> slow mode OFF ; "50% of non-dz range" less than 5 >> slow mode OFF
     //     slow mode max output >> when slow mode ON && slow mode max output value out of range, will auto correct to legit min or max
     //     use ANALOG_WIDE mode >> y = yes, n = no
+    //     diagonal scaling limiter >> default & recommended 125 ; 0 = 125 ; will auto correct to legit min or max
     // }
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
