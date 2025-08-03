@@ -124,7 +124,7 @@ Let's try to fix this, but unfortunately with a price to pay.
 ``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n``  
 Change ``s=0,0`` to ``s=32,16``, here's the result:  
 
-![l=64,127,y,s=32,16;r=64,127,y,s=32,16;n](https://github.com/user-attachments/assets/ab320a13-e733-45dc-9e68-dbb877dcaea8)  
+![l=64,127,y,s=32,16;r=64,127,y,s=32,16;n](https://github.com/user-attachments/assets/53e0a449-f811-4cd3-9749-222e0a274379)  
 
 Now it's easier to sneak / snipe.  
 However, the outer half is sacrificed. Gradient is increased, making the outer half even harder to do tiny adjustments.  
