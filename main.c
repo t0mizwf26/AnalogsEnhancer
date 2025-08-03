@@ -134,15 +134,15 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         // find diagonal scaling factor (1 ~ sqrt(2))
         float dIntensFactor = (float) diagScale * 1.27f;
         if (diagScale > 141 || diagScale > maximum) dIntensFactor = maximum;
-        float diagScale = maximum / dIntensFactor;
+        float diagScaleFactor = maximum / dIntensFactor;
 
         if (maximum > 1.25f * 127.0f) maximum = 1.25f * 127.0f;
         if (maximum < magnitude) maximum = magnitude;
 
         // find scaled axis values with magnitudes between slow mode boundary and max output
         float scalingFactor = maximum / magnitude * (magnitude - deadZone) / ((maximum - (127.0f - deadZoneOuter)) - deadZone);
-        analogX = (analogX * scalingFactor * diagScale);
-        analogY = (analogY * scalingFactor * diagScale);
+        analogX = (analogX * scalingFactor * diagScaleFactor);
+        analogY = (analogY * scalingFactor * diagScaleFactor);
 
         // clamp to ensure results will always lie between 0 and 255
         absAnalogX = fabs(analogX);
