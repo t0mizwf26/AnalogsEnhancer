@@ -181,7 +181,7 @@ This Diagonal Scaling feature might be useful when trying to fix that.
 #### 6.1) How to configure Diagonal Scaling
 
 The **Minimum** is **0** (means 1.00x, Scaling Diagonal Scaling is Off).  
-The **Maximum** is **42** 
+The **Maximum** is **42**  
 (Anything out of the min. ~ max. range will get **autocorrected to Minimum or Maximum**.)  
 
 **Increasing** the value makes the stick reach its diagonal Max output earlier.  
