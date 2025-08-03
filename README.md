@@ -34,7 +34,7 @@ ur0:tai/AnalogsEnhancerKai.skprx
 >  
 > All the **"Dead Zone"** and **"Slow Mode"** example graphs below were created for v1.1.0.  
 > So you will find v1.2.0's new **"Diagonal Scaling (DS)"** config, or ``d=0``, missing.  
-> However, **"DS"** config will not affect any of the examples. They are **NOT** outdated and still usable.  
+> However, **"DS"** config will not affect any of the examples. They are **NOT** outdated.  
 > (Descriptions are updated)  
 > Just remember, in real v1.2.0 config file, there's now ``d=0`` at the end of the config.  
 > **"Diagonal Scaling"** is explained after **"5) ANALOG_WIDE"**.  
@@ -177,29 +177,28 @@ The **"d=0"** from ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0``.
 
 In some software, the stick may have difficulty in reaching Max output in diagonal directions.  
 This Diagonal Scaling feature might be useful when trying to fix that.  
+(For example, there are people reporting issues with PSP games using **Adrenaline**.)  
 
 #### 6.1) How to configure Diagonal Scaling
 
-The **Minimum** is **0** (means 1.00x, Scaling Diagonal Scaling is Off).  
-The **Maximum** is **42**  
+The **Minimum** is **0** (means Scale Factor 1.00x, Diagonal Scaling is Off).  
+The **Maximum** is **42**.  
 (Anything out of the min. ~ max. range will get **autocorrected to Minimum or Maximum**.)  
 
 **Increasing** the value makes the stick reach its diagonal Max output earlier.  
-(For example, there are people reporting issues with PSP games using **Adrenaline**.)  
 
 #### 6.2) Note
 
 > This feature **only works with "Rescaling On"**.  
 
-> You might have to edit this value often if you have many games having problems.  
+> You might have to edit this value often.  
 > For example, if you find **"d=42"** works best for **Adrenaline**, leaving it at 42 will cause other games to reach Max on diagonal directions too early.  
 > Since those games might work best with **"d=0"**.  
 
 > There's no plan to implement "per-game profile" for AnalogsEnhancerKai.  
 
-> Using "**Outer Dead Zone - Rescaling On**" could achieve a very similar fix.  
-> However, it will compress/sacrifice useable range for non-diagonal directions.  
-> This "**Diagonal Scaling**" will not.  
+> Using "**Outer Dead Zone - Rescaling On**" could achieve a very similar fix, but it will be harder to make tiny adjustments.  
+> This "**Diagonal Scaling**" doesn't have that problem.  
 
 #### 6.3) Some more details about Diagonal Scaling
 
@@ -211,11 +210,10 @@ In most cases it's somewhere between a square and a circle, with rounded corners
 
 An extreme example would be "**Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")**", that's a square.  
 Normally the stick moves within the circle and should not reach those 4 corners.  
-``0,0 ; 0,255 ; 255,255 ; 255,0`` for PS Vita.  
+(``0,0 ; 0,255 ; 255,255 ; 255,0`` for PS Vita)  
 
-We need to have this "**circularity**" in mind when doing "**Dead Zone with Rescaling On**".  
-However, if some games require values near those 4 corners to work properly, then there are problems.  
-By using **Outer Dead Zone - Rescaling On** or **Diagonal Scaling**, we are bringing those inaccessible corner areas into the circle, so the problem is fixed.  
+There will be problems if some games require values near those 4 corners in order to work properly.  
+By using **Outer Dead Zone - Rescaling On** or **Diagonal Scaling**, we could bring those inaccessible corner areas into the circle.  
 
 ## Understand & Customise Config File
 
