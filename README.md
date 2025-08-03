@@ -33,12 +33,13 @@ ur0:tai/AnalogsEnhancerKai.skprx
 > **!! IMPORTANT NOTE: PLEASE READ !!**
 >  
 > All the **"Dead Zone"** and **"Slow Mode"** example graphs below were created for v1.1.0.  
-> So you will find v1.2.0's new **"Diagonal Scaling Limiter (DSL)"** config, or ``d=125``, missing.
+> So you will find v1.2.0's new **"Diagonal Scaling Limiter (DSL)"** config, or ``d=125``, missing.  
 > However, **"DSL"** config will not affect any of the examples. They are **NOT** outdated and still usable.  
-> (Text are updated)  
+> (Descriptions are updated)  
 > Just remember, in real v1.2.0 config file, there's now ``d=SOMETHING`` at the end of the config.  
-> **"DSL"** feature is explained after **"5) ANALOG_WIDE"**  
-> Thanks, and please read on  
+> **"DSL"** feature is explained after **"5) ANALOG_WIDE"**.
+>  
+> Thanks, and please read on.  
 
 ### 1) Introduction
 
@@ -65,6 +66,7 @@ The full range is available, no input is ignored (skipped), allowing low-magnitu
 
 ``l=16,127,n,s=0,0;r=16,127,n,s=0,0;n;d=125``  
 Fewer people would choose to use this. Less ideal, some input is ignored (skipped).  
+
 In this example, low-magnitude adjustments with magnitude < 16 are impossible.  
 There's one advantage, though. Notice the gradient here is still **1**?  
 Unlike the previous **Rescaling On** example with gradient **2**.  
@@ -94,7 +96,7 @@ Bring more _cute cat paw claw grip cap cover_!!.
 #### 3.2) Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")
 
 ``l=0,80,n,s=0,0;r=0,80,n,s=0,0;n;d=125``  
-The problem is solved by using **Rescaling On**.  
+The _little joystick covers_ problem is solved by using **Rescaling On**.  
 Q: What should **Rescaling Off** do? A: **Go retro.**  
 Now here's something niche.  
 
@@ -176,7 +178,7 @@ Maybe it's confusing, but this should be useful in certain situations.
 
 In some software, the stick may have difficulty in reaching MAX in diagonal directions.  
 Lowering the value should help by making the stick reach its diagonal MAX sooner.  
-(For example, there are people reporting issues about PSP games using **Adrenaline**.)  
+(For example, there are people reporting issues with PSP games using **Adrenaline**.)  
 
 Or, if the stick is reaching MAX on diagonal directions too early, increasing this value might help.  
 
