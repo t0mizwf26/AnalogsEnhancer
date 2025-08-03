@@ -277,6 +277,7 @@ void loadConfig(void) {
     sscanf(buffer, "l=%lu,%lu,%c,s=%lu,%lu;r=%lu,%lu,%c,s=%lu,%lu;%c;d=%lu", &deadzoneLeft, &deadzoneOuterLeft, &rescaleLeft, &slowTravelLeft, &slowMaxLeft, &deadzoneRight, &deadzoneOuterRight, &rescaleRight, &slowTravelRight, &slowMaxRight, &widePatch, &diagonalLimiter);
 
     // config explained
+    //
     // l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=125 {
     //     l={ left inner dz boundary (0 , 1 ~ 126 , 127) }, { left outer dz boundary (0 , 1 ~ 126 , 127) }, { use left rescaling (y/n) }
     //     ,
@@ -294,10 +295,13 @@ void loadConfig(void) {
     //     inner dz boundary = 0 >> inner dz OFF ; > 126 >> always centre (x=127,y=127)
     //     outer dz boundary = 0 or = 127 >> outer dz OFF
     //     use rescaling >> y = yes, n = no
+    //
     //     slow mode boundary = 0 >> slow mode OFF ; inner dz OFF && outer dz OFF >> slow mode OFF ; "50% of non-dz range" less than 5 >> slow mode OFF
     //     slow mode max output >> when slow mode ON && slow mode max output value out of range, will auto correct to legit min or max
+    //
     //     use ANALOG_WIDE mode >> y = yes, n = no
-    //     diagonal scaling limiter >> default & recommended 125 ; 0 = 125 ; will auto correct to legit min or max
+    //
+    //     diagonal scaling limiter >> default & recommended 125 ; 0 = 125 ; will auto correct to legit min or max ; currently only working in rescaleAnalogs()
     // }
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
