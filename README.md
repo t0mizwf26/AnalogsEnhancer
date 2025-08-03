@@ -268,6 +268,7 @@ For each non-"y/n" config:
 | Diagonal Scaling     | 1 ~ 42                 | **0** : Diagonal Scaling **OFF**                              |
 |                      |                        | **Autocorrect to Legit Min/Max**                              |
 |                      |                        | Only works with "**Rescaling On**"                            |
+|                      |                        | if **both Inner DZ & Outer DZ** = **OFF**, **DS OFF**         |
 
 Eagle-eyed readers might spot in **4.1) Slow Mode - Rescaling On**  
 ``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=0``  
