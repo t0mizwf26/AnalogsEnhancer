@@ -306,7 +306,7 @@ void loadConfig(void) {
     //
     //     use ANALOG_WIDE mode >> y = yes, n = no
     //
-    //     diagonal scaling = 0 >> diagonal scaling OFF ; currently only working in rescaleAnalogs()
+    //     diagonal scaling = 0 >> diagonal scaling OFF ; only working in rescaleAnalogs() ; inner dz OFF && outer dz OFF >> diagonal scaling OFF
     // }
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
