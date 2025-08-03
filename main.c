@@ -117,6 +117,10 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
     if (magnitude > slowZoneEnd){
         //adjust maximum magnitude
         float maximum;
+        if (absAnalogX > absAnalogY)
+            maximum = sqrt(127.0f * 127.0f + ((127.0f * analogY) / absAnalogX) * ((127.0f * analogY) / absAnalogX));
+        else
+            maximum = sqrt(127.0f * 127.0f + ((127.0f * analogX) / absAnalogY) * ((127.0f * analogX) / absAnalogY));
 
         // check if diagonal scaling config is legit (0 ~ 42), auto correct to min or max
         if (diagScale < 0) diagScale = 0;
@@ -126,16 +130,10 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         // 142 (i.e. 0) means diagonal scaling off (1.42000f > sqrt(2))
         diagScale = (-1) * (diagScale - 142);
 
-        if (absAnalogX > absAnalogY)
-            maximum = sqrt(127.0f * 127.0f + ((127.0f * analogY) / absAnalogX) * ((127.0f * analogY) / absAnalogX));
-        else
-            maximum = sqrt(127.0f * 127.0f + ((127.0f * analogX) / absAnalogY) * ((127.0f * analogX) / absAnalogY));
-
-        // find diagonal scaling factor (1.0 ~ sqrt(2))
-        // (179.605 ~ 127.000)
+        // (179.605f ~ 127.000f)
         float diagScaleDivisor = (float) diagScale * 1.27f;
-        if (diagScale > 141 || diagScale > maximum) diagScaleDivisor = maximum;
-        // (1.0 ~ sqrt(2))
+        if (diagScale > 141 || diagScaleDivisor > maximum) diagScaleDivisor = maximum;
+        // diagonal scaling factor (1.0 ~ sqrt(2))
         float diagScaleFactor = maximum / diagScaleDivisor;
 
         if (maximum > 1.25f * 127.0f) maximum = 1.25f * 127.0f;
