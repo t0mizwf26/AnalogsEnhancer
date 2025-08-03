@@ -131,8 +131,6 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
         else
             maximum = sqrt(127.0f * 127.0f + ((127.0f * analogX) / absAnalogY) * ((127.0f * analogX) / absAnalogY));
 
-        // find diagonal scaling factor (1 ~ sqrt(2))
-        float dIntensFactor = (float) diagScale * 1.27f;
         if (diagScale > 141 || diagScale > maximum) dIntensFactor = maximum;
         float diagScaleFactor = maximum / dIntensFactor;
 
