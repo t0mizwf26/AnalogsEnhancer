@@ -30,17 +30,6 @@ ur0:tai/AnalogsEnhancerKai.skprx
 
 ## Features Explained
 
-> **!! IMPORTANT NOTE: PLEASE READ !!**
->  
-> All the **"Dead Zone"** and **"Slow Mode"** example graphs below were created for v1.1.0.  
-> So you will find v1.2.0's new **"Diagonal Scaling (DS)"** config, or ``d=0``, missing.  
-> However, **"DS"** config will not affect any of the examples. They are **NOT** outdated.  
-> (Descriptions are updated)  
-> Just remember, in real v1.2.0 config file, there's now ``d=0`` at the end of the config.  
-> **"Diagonal Scaling"** is explained after **"5) ANALOG_WIDE"**.  
->  
-> Thanks, please read on.  
-
 ### 1) Introduction
 
 If .txt config file is missing, the following default config will be used instead.  
