@@ -181,15 +181,17 @@ This Diagonal Scaling feature might be useful when trying to fix that.
 
 #### 6.1) How to configure Diagonal Scaling
 
-The **Minimum** is **0** (means Scale Factor 1.00x, Diagonal Scaling is Off).  
-The **Maximum** is **42**.  
-(Anything out of the min. ~ max. range will get **autocorrected to Minimum or Maximum**.)  
+The **Minimum (Off)** is **0** (Diagonal Scale Factor = 1.00x).  
+The **Maximum** is **42** (Answer to the Ultimate Question of Life, The Universe, and Everything).  
+
+Anything out of range will get **autocorrected**.  
 
 **Increasing** the value makes the stick reach its diagonal Max output earlier.  
 
 #### 6.2) Note
 
 > This feature **only works with "Rescaling On"**.  
+> It also requires "**Dead Zone On**" to function. (E.g. "Inner DZ = 1")
 
 > You might have to edit this value often.  
 > For example, if you find **"d=42"** works best for **Adrenaline**, leaving it at 42 will cause other games to reach Max on diagonal directions too early.  
@@ -197,8 +199,8 @@ The **Maximum** is **42**.
 
 > There's no plan to implement "per-game profile" for AnalogsEnhancerKai.  
 
-> Using "**Outer Dead Zone - Rescaling On**" could achieve a very similar fix, but it will be harder to make tiny adjustments.  
-> This "**Diagonal Scaling**" doesn't have that problem.  
+> While using "**Outer Dead Zone - Rescaling On**" could achieve a similar fix, "**Diagonal Scaling**" does the job better.  
+> Unlike Dead Zone, **Diagonal Scaling** only makes adjustments for diagonal directions.  
 
 #### 6.3) Some more details about Diagonal Scaling
 
@@ -213,7 +215,7 @@ Normally the stick moves within the circle and should not reach those 4 corners.
 (``0,0 ; 0,255 ; 255,255 ; 255,0`` for PS Vita)  
 
 There will be problems if some games require values near those 4 corners in order to work properly.  
-By using **Outer Dead Zone - Rescaling On** or **Diagonal Scaling**, we could bring those inaccessible corner areas into the circle.  
+By using **Diagonal Scaling** (or **Outer Dead Zone - Rescaling On**), we could make those inaccessible corner areas reachable.  
 
 ## Understand & Customise Config File
 
