@@ -181,12 +181,12 @@ This Diagonal Scaling feature might be useful when trying to fix that.
 
 #### 6.1) How to configure Diagonal Scaling
 
-The **Minimum (Off)** is **0** (Diagonal Scale Factor = 1.00x).  
-The **Maximum** is **42** (Answer to the Ultimate Question of Life, The Universe, and Everything).  
+**Off** is **0** (Diagonal Scale Factor = 1.00x).  
+The **Minimum** is **1** and the **Maximum** is **42** (Answer to the Ultimate Question of Life, The Universe, and Everything).  
 
-Anything out of range will get **autocorrected**.  
+(Out of range value will get **autocorrected**.)  
 
-**Increasing** the value makes the stick reach its diagonal Max output earlier.  
+**Increasing** the value makes the stick reach its diagonal Max output faster.  
 
 #### 6.2) Note
 
@@ -194,10 +194,10 @@ Anything out of range will get **autocorrected**.
 > It also requires "**Dead Zone On**" to function. (E.g. "Inner DZ = 1")
 
 > You might have to edit this value often.  
-> For example, if you find **"d=42"** works best for **Adrenaline**, leaving it at 42 will cause other games to reach Max on diagonal directions too early.  
+> For example, if you find **"d=42"** works best for **Adrenaline**, leaving it at 42 will cause other games to reach diagonal Max too early.  
 > Since those games might work best with **"d=0"**.  
 
-> There's no plan to implement "per-game profile" for AnalogsEnhancerKai.  
+> There's **no** plan to implement "per-game profile" for AnalogsEnhancerKai.  
 
 > While using "**Outer Dead Zone - Rescaling On**" could achieve a similar fix, "**Diagonal Scaling**" does the job better.  
 > Unlike Dead Zone, **Diagonal Scaling** only makes adjustments for diagonal directions.  
@@ -211,7 +211,7 @@ If trying to draw a circle using the stick's maximum tilt, software-wise speakin
 In most cases it's somewhere between a square and a circle, with rounded corners.  
 
 An extreme example would be "**Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")**", that's a square.  
-Normally the stick moves within the circle and should not reach those 4 corners.  
+Normally, the stick should stay inside the circle, and should not reach those 4 corners.  
 (``0,0 ; 0,255 ; 255,255 ; 255,0`` for PS Vita)  
 
 There will be problems if some games require values near those 4 corners in order to work properly.  
@@ -266,7 +266,7 @@ For each non-"y/n" config:
 | Slow Mode Max Output | 5 ~ "Slow Mode Range"  | **Autocorrect to Legit Min/Max**                              |
 | -------------------- | ---------------------- | ------------------------------------------------------------- |
 | Diagonal Scaling     | 1 ~ 42                 | **0** : Diagonal Scaling **OFF**                              |
-|                      |                        | **Autocorrect to Legit Min/Max**                              |
+|                      |                        | **Autocorrect to OFF/Max**                                    |
 |                      |                        | Only works with "**Rescaling On**"                            |
 |                      |                        | if **both Inner DZ & Outer DZ** = **OFF**, **DS OFF**         |
 
