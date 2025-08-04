@@ -1,4 +1,4 @@
-# [AnalogsEnhancerKai](https://github.com/t0mizwf26/AnalogsEnhancerKai/) for PS Vita
+# [AnalogsEnhancerKai](https://github.com/t0mizwf26/AnalogsEnhancerKai/) for PS Vita (v1.2.0)
 
 A fork of PS Vita kernel plugin [Rinnegatamante](https://github.com/Rinnegatamante)/[AnalogsEnhancer](https://github.com/Rinnegatamante/AnalogsEnhancer)  
 By [t0mizwf26](https://github.com/t0mizwf26) & [yakit4k0](https://github.com/yakit4k0) (u/Yakitako-Kun)  
@@ -276,14 +276,14 @@ Eagle-eyed readers might spot in **4.1) Slow Mode - Rescaling On**
 
 ## Version History
 
-* 1.2.0 (2025-08-03 UTC)
+* 1.2.0 (2025-08-04)
     * Add new **Diagonal Scaling (DS)** feature for fixing inability to reach diagonal Max output in some games
     * Config structure changed again for **DS**, please update your config file to v1.2.0
-* 1.1.0 (2025-08-01 UTC)
+* 1.1.0 (2025-08-01)
     * Add new **Slow Mode** feature for better low-magnitude stick movement
     * Can use either **ur0:tai** or **ux0:data/AnalogsEnhancerKai** as config file folder
     * Config structure changed and is no longer compatible with older versions
-* 1.0.1 (2025-07-27 UTC)
+* 1.0.1 (2025-07-27)
     * Initial Release
     * Add new **Outer Dead Zone** feature
     * Config file moved to **ur0:tai/**
