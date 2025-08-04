@@ -169,7 +169,7 @@ void rescaleAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv
 }
 
 void deadzoneAnalogs(uint8_t *x, uint8_t *y, int dead, int deadOuter, int slowTrv, int slowMax, int diagScale) {
-    // diagScale currently unused in deadzoneAnalogs()
+    // diagScale unused in deadzoneAnalogs()
 
     // [step 1] deadzone covers the entire range, always centre
 
@@ -302,7 +302,7 @@ void loadConfig(void) {
     //
     //     use ANALOG_WIDE mode >> y = yes, n = no
     //
-    //     diagonal scaling = 0 >> diagonal scaling OFF ; only working in rescaleAnalogs() ; inner dz OFF && outer dz OFF >> diagonal scaling OFF
+    //     diagonal scaling = 0 >> diagonal scaling OFF ; require rescaleAnalogs() ; inner dz OFF && outer dz OFF >> diagonal scaling OFF
     // }
 
     if (rescaleLeft == 'y') patchFuncLeft = rescaleAnalogs;
