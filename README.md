@@ -47,7 +47,7 @@ If .txt config file is missing, the following default config will be used instea
 ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0``  
 Which means every feature offered by this plugin is turned **OFF**.  
 
-![l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/8b9586f9-aa5f-4e8d-8bf8-9fd243acee22)  
+![l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/cbbc77b9-c68d-4d90-894b-51e2ba738a12)  
 
 ### 2) Inner Dead Zone
 
@@ -60,7 +60,7 @@ With 2 different modes to choose from: **Rescaling On** & **Rescaling Off**.
 This is probably the most common Dead Zone people would use to fix drifting analogue sticks.  
 The full range is available, no input is ignored (skipped), allowing low-magnitude adjustments.  
 
-![l=64,127,y,s=0,0;r=64,127,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/948025db-147b-44b8-a299-be4e982d5ee9)  
+![l=64,127,y,s=0,0;r=64,127,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/cc00b95b-c98d-4c34-9f87-fb01ab7c12bb)  
 
 #### 2.2) Inner Dead Zone - Rescaling Off (Radial Dead Zone)
 
@@ -72,7 +72,7 @@ There's one advantage, though. Notice the gradient here is still **1**?
 Unlike the previous **Rescaling On** example with gradient **2**.  
 This means it's a little easier to make precise adjustments for the remaining range (16 to Max).  
 
-![l=16,127,n,s=0,0;r=16,127,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/0cfbe53d-af94-4abb-be30-54aeea9d497f)  
+![l=16,127,n,s=0,0;r=16,127,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/eb2d2938-768b-4c73-b749-3411adc708af)  
 
 ### 3) Outer Dead Zone
 
@@ -91,7 +91,7 @@ Outer Dead Zone with **Rescaling Off** however, is something a little different.
 In this example, the stick reaches the max much earlier.  
 Bring more _cute cat paw claw grip cap cover_!!.  
 
-![l=0,80,y,s=0,0;r=0,80,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/134a7a74-48e5-4358-a695-c4c5db7b43ae)  
+![l=0,80,y,s=0,0;r=0,80,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/652fbfd4-e379-4ae4-9cd5-88fe26cf89cc)  
 
 #### 3.2) Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")
 
@@ -100,7 +100,7 @@ The _little joystick covers_ problem is solved by using **Rescaling On**.
 Q: What should **Rescaling Off** do? A: **Go retro.**  
 Now here's something niche.  
 
-![l=0,80,n,s=0,0;r=0,80,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/5120397e-85de-4eb6-a417-5c4ded417ec3)  
+![l=0,80,n,s=0,0;r=0,80,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/d78ee172-a7aa-489d-addc-b2eed5fd9c64)  
 
 #### 3.3) Whoa, hang on a second!
 
@@ -112,14 +112,14 @@ Right, but we could **use Inner & Outer Dead Zone together**.
 Note the **8-Way always has an "Axial Dead Zone" of magnitude 49**.  
 So by setting "Inner Dead Zone = Outer Dead Zone", we could have an **8-Way joystick with customisable actuation point (49 to 126)**  
 
-![l=80,80,n,s=0,0;r=80,80,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/c85f6bd1-60c4-43d3-bbcd-b180e1ffa961)  
-
-``l=80,80,y,s=0,0;r=80,80,y,s=0,0;n;d=0``  
+![l=80,80,n,s=0,0;r=80,80,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/3020cbc4-2397-4c03-9174-662507d41d9a)  
 
 You probably guessed we could do the same with **Rescaling On**, 360-Degree Movement with Max output only.  
 However, personally, I can't think of a reason to.  
 
-![l=80,80,y,s=0,0;r=80,80,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/b64aa177-72c8-4944-a29b-a2ba45fb4416)  
+``l=80,80,y,s=0,0;r=80,80,y,s=0,0;n;d=0``  
+
+![l=80,80,y,s=0,0;r=80,80,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/c77475bb-fee1-4a04-9d69-56374523f53f)  
 
 ### 4) S for Sniper? Snail? Shooter? ...Well, it's "Slow Mode"
 
@@ -136,7 +136,7 @@ Let's try to fix this, but unfortunately with a price to pay.
 ``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=0``  
 Change ``s=0,0`` to ``s=32,16``, here's the result:  
 
-![l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=0](https://github.com/user-attachments/assets/53e0a449-f811-4cd3-9749-222e0a274379)  
+![l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=0](https://github.com/user-attachments/assets/227e5c0b-35e4-4655-bd07-63b465a55adf)  
 
 Now it's easier to sneak / snipe.  
 However, the outer half is sacrificed. Gradient is increased, making the outer half even harder to do tiny adjustments.  
@@ -146,7 +146,7 @@ However, the outer half is sacrificed. Gradient is increased, making the outer h
 ``l=16,127,n,s=32,16;r=16,127,n,s=32,16;n;d=0``  
 Also change ``s=0,0`` to ``s=32,16``, see what happens here when **Rescaling Off**:  
 
-![l=16,127,n,s=32,16;r=16,127,n,s=32,16;n;d=0](https://github.com/user-attachments/assets/942dbd2c-86f8-42fd-8389-0b63ff16f261)  
+![l=16,127,n,s=32,16;r=16,127,n,s=32,16;n;d=0](https://github.com/user-attachments/assets/e0c492d0-bdaf-4b4d-9319-8b517771c777)  
 
 In this particular example, within Slow Mode range (32), the output magnitude will always be "16".  
 
@@ -155,7 +155,7 @@ In this particular example, within Slow Mode range (32), the output magnitude wi
 ``l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=0``  
 Who's going to do this?  
 
-![l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=0](https://github.com/user-attachments/assets/391ce4da-e428-46b5-be93-5e1bf828e5ab)  
+![l=16,80,n,s=32,8;r=16,80,n,s=32,8;n;d=0](https://github.com/user-attachments/assets/38f9a889-912f-4142-9ca5-397481810aab)  
 
 ### 5) ANALOG_WIDE
 
@@ -199,23 +199,39 @@ The **Minimum** is **1** and the **Maximum** is **42** (Answer to the Ultimate Q
 
 > There's **no** plan to implement "per-game profile" for AnalogsEnhancerKai.  
 
-> While using "**Outer Dead Zone - Rescaling On**" could achieve a similar fix, "**Diagonal Scaling**" does the job better.  
-> Unlike Dead Zone, **Diagonal Scaling** only makes adjustments for diagonal directions.  
-
 #### 6.3) Some more details about Diagonal Scaling
 
-The root cause of the problem is about "**stick circularity**".  
+This is about "**stick circularity**".  
 PC gamers might know that "[**Gamepad Tester - Test Circularity (spin joysticks slowly to test)**](https://hardwaretester.com/gamepad)".  
 
 If trying to draw a circle using the stick's maximum tilt, software-wise speaking, it will not be a perfect circle.  
 In most cases it's somewhere between a square and a circle, with rounded corners.  
+An extreme example would be "**Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")**", which is a square.  
 
-An extreme example would be "**Outer Dead Zone - Rescaling Off (8-Way, "Axial Dead Zone")**", that's a square.  
-Normally, the stick should stay inside the circle, and should not reach those 4 corners.  
-(``0,0 ; 0,255 ; 255,255 ; 255,0`` for PS Vita)  
+Ideally, the output of the stick should stay inside the circle and should not reach 4 corners of the square.  
 
-There will be problems if some games require values near those 4 corners in order to work properly.  
-By using **Diagonal Scaling** (or **Outer Dead Zone - Rescaling On**), we could make those inaccessible corner areas reachable.  
+> The config & image shown are for illustration purposes only and may not be an exact representation.  
+> ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0``  
+
+![l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0](https://github.com/user-attachments/assets/7bdf94e3-6d4d-4823-b4cc-367ce43b5436)  
+
+If some games require values near those 4 corners in order to work properly, then there will be problems.  
+If we try to fix the problem by making the stick reach those "corner" areas, one option would be using **Outer Dead Zone - Rescaling On**.  
+
+However, this makes precise movement harder, wasting a large area that only does Max output.  
+
+> The config & image shown are for illustration purposes only and may not be an exact representation.  
+> 127 / sqrt(2) = about 89.8  
+> ``l=0,88,y,s=0,0;r=0,88,y,s=0,0;n;d=0``  
+
+![l=0,88,y,s=0,0;r=0,88,y,s=0,0;n;d=0](https://github.com/user-attachments/assets/d31e1424-8ee5-41eb-95b2-0ca855011023)  
+
+Unlike Dead Zone, **Diagonal Scaling** only makes adjustments for diagonal directions, so it does the job better.  
+
+> The config & image shown are for illustration purposes only and may not be an exact representation.  
+> ``l=1,127,y,s=0,0;r=1,127,y,s=0,0;n;d=42``  
+
+![l=1,127,y,s=0,0;r=1,127,y,s=0,0;n;d=42](https://github.com/user-attachments/assets/8ec6a26b-46e3-4fa3-9556-879eb0524447)  
 
 ## Understand & Customise Config File
 
