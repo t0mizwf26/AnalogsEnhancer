@@ -220,7 +220,7 @@ Unlike Dead Zone, **Diagonal Scaling** only makes adjustments for diagonal direc
 > The config & image shown are for illustration purposes only and may not be an exact representation.  
 > ``l=1,127,y,s=0,0;r=1,127,y,s=0,0;n;d=42``  
 
-![l=1,127,y,s=0,0;r=1,127,y,s=0,0;n;d=42](https://github.com/user-attachments/assets/8ec6a26b-46e3-4fa3-9556-879eb0524447)  
+![l=1,127,y,s=0,0;r=1,127,y,s=0,0;n;d=42](https://github.com/user-attachments/assets/174e1729-3d12-4135-95da-6de786083912)  
 
 ## Understand & Customise Config File
 
