@@ -40,7 +40,7 @@ With "Outer Dead Zone" idea from u/lizin5ths (fork [Haasman0 / AnalogsEnhancer](
 *KERNEL
 ur0:tai/AnalogsEnhancerKai.skprx
 ```
-5. Reboot PS Vita
+5. Reboot PS Vita _(Reboot also required after config changes)_
 
 <p align="right"><a href="#quick-jump">Back to Top</a></p>
 
@@ -251,6 +251,8 @@ Unlike Dead Zone, **Diagonal Scaling** only makes adjustments for diagonal direc
 <p align="right"><a href="#quick-jump">Back to Top</a></p>
 
 ## Understand & Customise Config File
+
+> PS Vita reboot is **REQUIRED** after config changes.
 
 ``l=0,127,n,s=0,0;r=0,127,n,s=0,0;n;d=0``  
 
