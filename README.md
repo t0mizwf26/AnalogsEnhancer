@@ -321,10 +321,10 @@ The answer is "21.40". Use at least "22" for Inner DZ.
 
 **Q:** What about my character not being able to run at full speed in **diagonal directions**?  
 **A:** For example, if the game is having trouble running towards the top right corner, in VitaTester, tilt the stick towards that direction and check X & Y.  
-Using ``Left:(240X,5Y)`` as an example here, replace X & Y from the following:  
-``(sqrt((X-127)^2+(Y-127)^2)/127*100-142)*(-1)`` and Google it.  
-(Which means, Google ``(sqrt((240-127)^2+(5-127)^2)/127*100-142)*(-1)``)  
-The answer is "11.06". Use at least "12" for Diag. Scaling.  
+Using ``Left:(227X,27Y)`` as an example here, replace X & Y from the following:  
+``142-(sqrt((X-127)^2+(Y-127)^2)/1.27)`` and Google it.  
+(Which means, Google ``142-(sqrt((227-127)^2+(27-127)^2)/1.27)``)  
+The answer is "30.64". Use at least "31" for Diag. Scaling.  
 (If you get anything higher than 42, consider hardware repair.)  
 
 **Q:** What about **Outer Dead Zone**?  
