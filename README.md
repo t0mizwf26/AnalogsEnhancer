@@ -18,6 +18,7 @@ With "Outer Dead Zone" idea from u/lizin5ths (fork [Haasman0 / AnalogsEnhancer](
   * [5) ANALOG_WIDE](#5-analog_wide)
   * [6) Diagonal Scaling](#6-diagonal-scaling)
 * [Understand & Customise Config File](#understand--customise-config-file)
+  * [FAQ](#faq)
 * [Version History](#version-history)
 * [License](#license)
 * [Acknowledgements](#acknowledgements)
@@ -308,6 +309,28 @@ For each non-"y/n" config:
 Eagle-eyed readers might spot in **4.1) Slow Mode - Rescaling On**  
 ``l=64,127,y,s=32,16;r=64,127,y,s=32,16;n;d=0``  
 **32 > (127-64)/2**, ``s=32,16`` will get autocorrected to ``s=31,16``  
+
+### FAQ
+
+**Q:** I still need some help. My stick is drifting. How do I know what value I should use for **Inner Dead Zone**?  
+**A:** For drifting (unable to centre) problem, without touching the stick, reboot Vita and open VitaTester, check the value.  
+For example: ``Left:(110X,140Y)``. Replace X & Y from the following:  
+``sqrt((X-127)^2+(Y-127)^2)`` and Google it.  
+(Which means, Google ``sqrt((110-127)^2+(140-127)^2)``)  
+The answer is "21.40". Use at least "22" for Inner DZ.  
+
+**Q:** What about my character not being able to run at full speed in **diagonal directions**?  
+**A:** For example, if the game is having trouble running towards the top right corner, in VitaTester, tilt the stick towards that direction and check X & Y.  
+Using ``Left:(240X,5Y)`` as an example here, replace X & Y from the following:  
+``(sqrt((X-127)^2+(Y-127)^2)/127*100-142)*(-1)`` and Google it.  
+(Which means, Google ``(sqrt((240-127)^2+(5-127)^2)/127*100-142)*(-1)``)  
+The answer is "11.06". Use at least "12" for Diag. Scaling.  
+(If you get anything higher than 42, consider hardware repair.)  
+
+**Q:** What about **Outer Dead Zone**?  
+**A:** Full Up = (127X,0Y), Full Down = (127X,255Y), Full Left = (0X,127Y), Full Right = (255X,127Y).  
+If having trouble reaching Full Up/Down/Left/Right (0 or 255), for example, cannot reach Full Down, it stops at (127X,250Y).  
+``255-250=5``, then ``127-5=122``. Use "122" or lower for Outer DZ.  
 
 <p align="right"><a href="#quick-jump">Back to Top</a></p>
 
